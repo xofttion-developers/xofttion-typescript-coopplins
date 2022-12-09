@@ -1,6 +1,10 @@
 import Coopplins from './server';
 
-export { DatabaseSql } from './database';
+export {
+  DatabaseSql,
+  ServerEntityDataSource,
+  ServerEntityDatabase
+} from './database';
 export {
   Controller,
   Delete,
@@ -11,5 +15,6 @@ export {
   Post,
   Put
 } from './decorators';
+export { OnMiddleware } from './types';
 
 export default Coopplins;
