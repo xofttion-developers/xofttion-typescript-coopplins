@@ -1,6 +1,6 @@
 {
   "name": "@xofttion/coopplins",
-  "version": "1.0.0",
+  "version": "4.0.0",
   "author": "Daniel Andrés Castillo Pedroza",
   "license": "MIT",
   "main": "dist/index.js",
@@ -16,12 +16,14 @@
     "launch": "ts-node index.ts"
   },
   "dependencies": {
-    "@xofttion/clean-architecture": "^1.0.0",
-    "@xofttion/dependency-injection": "^1.0.0",
     "express": "^4.18.1",
     "mysql2": "^2.3.3",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.3.10"
+  },
+  "peerDependencies": {
+    "@xofttion/clean-architecture": "^4.0.0",
+    "@xofttion/dependency-injection": "^4.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.14",
