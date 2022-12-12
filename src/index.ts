@@ -15,6 +15,7 @@ export {
   Post,
   Put
 } from './decorators';
+export { environment } from './server';
 export { OnMiddleware } from './types';
 
 export default Coopplins;
