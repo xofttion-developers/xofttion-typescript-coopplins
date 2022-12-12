@@ -1,4 +1,5 @@
 import InjectableFactory from '@xofttion/dependency-injection';
+import { parse } from '@xofttion/utils';
 import dotenv, { DotenvConfigOptions } from 'dotenv';
 import express, { Express, NextFunction, Request, Response, Router } from 'express';
 import { RequestHandler } from 'express-serve-static-core';
@@ -81,35 +82,27 @@ function _createRouteCall(
   controller: ControllerType,
   config: RouteConfig
 ): RouteCallback {
-  const routeResolver = async (request: Request, response: Response) => {
+  const call = async (request: Request, response: Response) => {
     const resolver = controller[config.name].bind(controller);
 
     return await resolver(request, response);
   };
 
+  const production = environment<boolean>('PRODUCTION');
+
   switch (config.wrap) {
     case 'STANDARD':
       return async (request: Request, response: Response) => {
-        wrapStandard({
-          request,
-          response,
-          call: routeResolver,
-          production: environment('PRODUCTION')
-        });
+        wrapStandard({ request, response, call, production });
       };
 
     case 'TRANSACTION':
       return async (request: Request, response: Response) => {
-        wrapTransaction({
-          request,
-          response,
-          call: routeResolver,
-          production: environment('PRODUCTION')
-        });
+        wrapTransaction({ request, response, call, production });
       };
 
     default:
-      return routeResolver;
+      return call;
   }
 }
 
@@ -139,8 +132,8 @@ function _createMiddlewareCall(middleware: Function): RequestHandler | undefined
   };
 }
 
-export function environment(key: string): any {
-  return process.env[key];
+export function environment<T>(key: string): T {
+  return parse<T>(String(process.env[key]));
 }
 
 export default class Coopplins {

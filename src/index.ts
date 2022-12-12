@@ -16,6 +16,6 @@ export {
   Put
 } from './decorators';
 export { environment } from './server';
-export { OnMiddleware } from './types';
+export { OnMiddleware, ControllerResponse } from './types';
 
 export default Coopplins;
