@@ -1,9 +1,13 @@
 import InjectableFactory from '@xofttion/dependency-injection';
+import { Either } from '@xofttion/utils';
 import { Request, Response } from 'express';
-import { ServerEntityDatabase } from './database';
-import { ControllerResponse } from './types';
+import { CoopplinsEntityDatabase } from './database';
+import { EitherController } from './types';
 
-type Call = (request: Request, response: Response) => Promise<ControllerResponse>;
+type Call = (
+  request: Request,
+  response: Response
+) => Promise<EitherController | any>;
 
 type WrapOptions = {
   call: Call;
@@ -18,14 +22,18 @@ export async function wrapStandard(options: WrapOptions): Promise<any> {
   try {
     const controllerResult = await call(request, response);
 
-    controllerResult.fold({
-      right: (result) => {
-        response.status(200).json(result);
-      },
-      left: (result) => {
-        response.status(result.statusCode).json(result.data);
-      }
-    });
+    if (controllerResult instanceof Either) {
+      controllerResult.fold({
+        right: (result) => {
+          response.status(200).json(result);
+        },
+        left: (result) => {
+          response.status(result.statusCode).json(result.data);
+        }
+      });
+    } else {
+      response.status(200).json(controllerResult);
+    }
   } catch (ex) {
     wrapException(response, ex, production);
   }
@@ -34,7 +42,7 @@ export async function wrapStandard(options: WrapOptions): Promise<any> {
 export async function wrapTransaction(options: WrapOptions): Promise<any> {
   const { request, response, call, production } = options;
 
-  const entityDatabase = InjectableFactory(ServerEntityDatabase);
+  const entityDatabase = InjectableFactory(CoopplinsEntityDatabase);
 
   try {
     await entityDatabase.connect();
@@ -42,14 +50,18 @@ export async function wrapTransaction(options: WrapOptions): Promise<any> {
 
     const controllerResult = await call(request, response);
 
-    controllerResult.fold({
-      right: (result) => {
-        response.status(200).json(result);
-      },
-      left: (result) => {
-        response.status(result.statusCode).json(result.data);
-      }
-    });
+    if (controllerResult instanceof Either) {
+      controllerResult.fold({
+        right: (result) => {
+          response.status(200).json(result);
+        },
+        left: (result) => {
+          response.status(result.statusCode).json(result.data);
+        }
+      });
+    } else {
+      response.status(200).json(controllerResult);
+    }
 
     await entityDatabase.commit();
   } catch (ex) {

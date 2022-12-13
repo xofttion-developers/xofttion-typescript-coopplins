@@ -4,7 +4,7 @@ import dotenv, { DotenvConfigOptions } from 'dotenv';
 import express, { Express, NextFunction, Request, Response, Router } from 'express';
 import { RequestHandler } from 'express-serve-static-core';
 import { DataSource } from 'typeorm';
-import { DatabaseSql } from './database/driver-sql';
+import { databaseSql } from './database';
 import { controllersStore, middlewaresStore, routesStore } from './stores';
 import { ControllerConfig, OnMiddleware, RouteConfig } from './types';
 import { wrapStandard, wrapTransaction } from './wrap';
@@ -88,7 +88,7 @@ function _createRouteCall(
     return await resolver(request, response);
   };
 
-  const production = environment<boolean>('PRODUCTION');
+  const production = coopplins.environment<boolean>('PRODUCTION');
 
   switch (config.wrap) {
     case 'STANDARD':
@@ -132,16 +132,12 @@ function _createMiddlewareCall(middleware: Function): RequestHandler | undefined
   };
 }
 
-export function environment<T>(key: string): T {
-  return parse<T>(String(process.env[key]));
-}
-
-export default class Coopplins {
-  public static controllers(controllers: Function[]): void {
+class Coopplins {
+  public controllers(controllers: Function[]): void {
     _registerControllers(controllers);
   }
 
-  public static start(port: number, call: () => void): void {
+  public start(port: number, call: () => void): void {
     try {
       _startServer(port, call);
     } catch (error) {
@@ -149,15 +145,21 @@ export default class Coopplins {
     }
   }
 
-  public static use(...handlers: RequestHandler[]): void {
+  public use(...handlers: RequestHandler[]): void {
     server.use(handlers);
   }
 
-  public static database(database: DataSource): void {
-    DatabaseSql.dataSource = database;
+  public database(database: DataSource): void {
+    databaseSql.dataSource = database;
   }
 
-  public static environment(options?: Partial<DotenvConfigOptions>): void {
+  public environment<T>(key: string, options?: Partial<DotenvConfigOptions>): T {
     dotenv.config(options);
+
+    return parse<T>(String(process.env[key]));
   }
 }
+
+const coopplins = new Coopplins();
+
+export default coopplins;

@@ -5,9 +5,9 @@ export type ControllerConfig = {
   middlewares: Function[];
 };
 
-type ControllerResponseLeft = {
+export type EitherControllerInvalid = {
   data: any;
   statusCode: number;
 };
 
-export type ControllerResponse<T = unknown> = Either<ControllerResponseLeft, T>;
+export type EitherController<T = unknown> = Either<EitherControllerInvalid, T>;
