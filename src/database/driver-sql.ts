@@ -1,20 +1,20 @@
 import { DataSource, QueryRunner } from 'typeorm';
 
-export class DatabaseSql {
-  private static _dataSource?: DataSource;
-  private static _runner?: QueryRunner;
+class DatabaseSql {
+  private _dataSource?: DataSource;
+  private _runner?: QueryRunner;
 
-  public static set dataSource(datasource: DataSource | undefined) {
+  public set dataSource(datasource: DataSource | undefined) {
     if (datasource) {
       this._dataSource = datasource;
     }
   }
 
-  public static get dataSource(): DataSource | undefined {
+  public get dataSource(): DataSource | undefined {
     return this._dataSource;
   }
 
-  public static get runner(): QueryRunner | undefined {
+  public get runner(): QueryRunner | undefined {
     if (this._dataSource && !this._runner) {
       this._runner = this._dataSource.createQueryRunner();
     }
@@ -22,3 +22,5 @@ export class DatabaseSql {
     return this._runner;
   }
 }
+
+export const databaseSql = new DatabaseSql();

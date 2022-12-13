@@ -1,31 +1,31 @@
 import { EntityDatabase } from '@xofttion/clean-architecture';
 import { Injectable } from '@xofttion/dependency-injection';
 import { QueryRunner } from 'typeorm';
-import { DatabaseSql } from './driver-sql';
+import { databaseSql } from './driver-sql';
 
 type CallRunner = (runner: QueryRunner) => Promise<void>;
 
 @Injectable()
-export class ServerEntityDatabase implements EntityDatabase {
+export class CoopplinsEntityDatabase implements EntityDatabase {
   public async connect(): Promise<void> {
-    if (DatabaseSql.dataSource) {
-      if (!DatabaseSql.dataSource.isInitialized) {
-        await DatabaseSql.dataSource.initialize();
+    if (databaseSql.dataSource) {
+      if (!databaseSql.dataSource.isInitialized) {
+        await databaseSql.dataSource.initialize();
       }
 
-      if (DatabaseSql.runner) {
-        await DatabaseSql.runner.connect();
+      if (databaseSql.runner) {
+        await databaseSql.runner.connect();
       }
     }
   }
 
   public async disconnect(full?: boolean): Promise<void> {
-    if (!DatabaseSql.runner?.isReleased) {
-      await DatabaseSql.runner?.release();
+    if (!databaseSql.runner?.isReleased) {
+      await databaseSql.runner?.release();
     }
 
-    if (full && DatabaseSql.dataSource?.isInitialized) {
-      await DatabaseSql.dataSource?.destroy();
+    if (full && databaseSql.dataSource?.isInitialized) {
+      await databaseSql.dataSource?.destroy();
     }
   }
 
@@ -48,8 +48,8 @@ export class ServerEntityDatabase implements EntityDatabase {
   }
 
   private async _execRunner(call: CallRunner): Promise<void> {
-    if (DatabaseSql.runner && !DatabaseSql.runner.isReleased) {
-      await call(DatabaseSql.runner);
+    if (databaseSql.runner && !databaseSql.runner.isReleased) {
+      await call(databaseSql.runner);
     }
   }
 }

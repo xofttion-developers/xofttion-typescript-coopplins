@@ -1,9 +1,9 @@
-import Coopplins from './server';
+import coopplins from './server';
 
 export {
-  DatabaseSql,
-  ServerEntityDataSource,
-  ServerEntityDatabase
+  databaseSql,
+  CoopplinsEntityDataSource,
+  CoopplinsEntityDatabase
 } from './database';
 export {
   Controller,
@@ -15,7 +15,6 @@ export {
   Post,
   Put
 } from './decorators';
-export { environment } from './server';
-export { OnMiddleware, ControllerResponse } from './types';
+export { OnMiddleware, EitherController as ControllerResponse } from './types';
 
-export default Coopplins;
+export default coopplins;

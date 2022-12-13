@@ -1,12 +1,12 @@
 import { EntityDataSource, ModelORM } from '@xofttion/clean-architecture';
 import { Injectable } from '@xofttion/dependency-injection';
 import { QueryRunner } from 'typeorm';
-import { DatabaseSql } from './driver-sql';
+import { databaseSql } from './driver-sql';
 
 type CallRunner = (runner: QueryRunner) => Promise<void>;
 
 @Injectable()
-export class ServerEntityDataSource implements EntityDataSource {
+export class CoopplinsEntityDataSource implements EntityDataSource {
   public async insert(model: ModelORM): Promise<void> {
     await this._execRunner(async (runner) => {
       await runner.manager.save(model);
@@ -26,8 +26,8 @@ export class ServerEntityDataSource implements EntityDataSource {
   }
 
   private async _execRunner(call: CallRunner): Promise<void> {
-    if (DatabaseSql.runner && !DatabaseSql.runner.isReleased) {
-      await call(DatabaseSql.runner);
+    if (databaseSql.runner && !databaseSql.runner.isReleased) {
+      await call(databaseSql.runner);
     }
   }
 }

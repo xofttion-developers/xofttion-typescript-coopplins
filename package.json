@@ -1,6 +1,6 @@
 {
   "name": "@xofttion/coopplins",
-  "version": "4.0.5",
+  "version": "4.1.0",
   "author": "Daniel Andrés Castillo Pedroza",
   "license": "MIT",
   "main": "dist/index.js",
@@ -22,7 +22,7 @@
     "typeorm": "^0.3.10"
   },
   "peerDependencies": {
-    "@xofttion/clean-architecture": "^4.0.0",
+    "@xofttion/clean-architecture": "^4.0.1",
     "@xofttion/dependency-injection": "^4.0.0",
     "@xofttion/utils": "^4.0.2"
   },
