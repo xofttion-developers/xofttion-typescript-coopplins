@@ -33,4 +33,4 @@ class RouteStore {
   }
 }
 
-export const routesStore = new RouteStore();
+export const routes = new RouteStore();

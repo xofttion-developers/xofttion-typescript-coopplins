@@ -10,4 +10,4 @@ class MiddlewareStore {
   }
 }
 
-export const middlewaresStore = new MiddlewareStore();
+export const middlewares = new MiddlewareStore();

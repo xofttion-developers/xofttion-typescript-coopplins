@@ -1,11 +1,6 @@
 import coopplins from './server';
 
 export {
-  databaseSql,
-  CoopplinsEntityDataSource,
-  CoopplinsEntityDatabase
-} from './database';
-export {
   Controller,
   Delete,
   Get,
@@ -15,6 +10,6 @@ export {
   Post,
   Put
 } from './decorators';
-export { OnMiddleware, EitherController as ControllerResponse } from './types';
+export { OnMiddleware, EitherController } from './types';
 
 export default coopplins;

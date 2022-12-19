@@ -3,11 +3,9 @@ import { parse } from '@xofttion/utils';
 import dotenv, { DotenvConfigOptions } from 'dotenv';
 import express, { Express, NextFunction, Request, Response, Router } from 'express';
 import { RequestHandler } from 'express-serve-static-core';
-import { DataSource } from 'typeorm';
-import { databaseSql } from './database';
-import { controllersStore, middlewaresStore, routesStore } from './stores';
+import { controllers, middlewares, routes } from './stores';
 import { ControllerConfig, OnMiddleware, RouteConfig } from './types';
-import { wrapStandard, wrapTransaction } from './wrap';
+import { wrapStandard } from './wrap';
 
 type ControllerType = { [key: string | symbol]: Function };
 type RouteCallback = (request: Request, response: Response) => Promise<any>;
@@ -19,16 +17,16 @@ function _startServer(port: number, call: () => void): void {
   server.listen(port, call);
 }
 
-function _registerControllers(controllers: Function[]): void {
-  for (const controllerFn of controllers) {
-    const controllerConfig = controllersStore.get(controllerFn);
+function _registerControllers(_controllers: Function[]): void {
+  for (const controllerFn of _controllers) {
+    const controllerConfig = controllers.get(controllerFn);
 
     if (controllerConfig) {
       const controller = InjectableFactory<ControllerType>(controllerFn);
 
       const routerController = _createRouterController(controllerConfig);
 
-      const routesConfig = routesStore.get(controllerFn);
+      const routesConfig = routes.get(controllerFn);
 
       for (const routeConfig of routesConfig) {
         const routeHttp = _createRouteHttp(routerController, routeConfig);
@@ -90,20 +88,9 @@ function _createRouteCall(
 
   const production = coopplins.environment<boolean>('PRODUCTION');
 
-  switch (config.wrap) {
-    case 'STANDARD':
-      return async (request: Request, response: Response) => {
-        wrapStandard({ request, response, call, production });
-      };
-
-    case 'TRANSACTION':
-      return async (request: Request, response: Response) => {
-        wrapTransaction({ request, response, call, production });
-      };
-
-    default:
-      return call;
-  }
+  return async (request: Request, response: Response) => {
+    wrapStandard({ request, response, call, production });
+  };
 }
 
 function _createRouteMiddleware(config: RouteConfig): Function[] {
@@ -121,7 +108,7 @@ function _createRouteMiddleware(config: RouteConfig): Function[] {
 }
 
 function _createMiddlewareCall(middleware: Function): RequestHandler | undefined {
-  if (!middlewaresStore.has(middleware)) {
+  if (!middlewares.has(middleware)) {
     return undefined;
   }
 
@@ -147,10 +134,6 @@ class Coopplins {
 
   public use(...handlers: RequestHandler[]): void {
     server.use(handlers);
-  }
-
-  public database(database: DataSource): void {
-    databaseSql.dataSource = database;
   }
 
   public environment<T>(key: string, options?: Partial<DotenvConfigOptions>): T {
