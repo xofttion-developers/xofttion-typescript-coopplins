@@ -1,14 +1,12 @@
 import { routes } from '../stores';
-import { RouteHttp, RouteWrap } from '../types';
+import { RouteHttp } from '../types';
 
 type HttpConfig = {
   middlewares: Function[];
-  wrap: RouteWrap;
 };
 
 const defaultConfig: HttpConfig = {
-  middlewares: [],
-  wrap: 'STANDARD'
+  middlewares: []
 };
 
 function createRoute(
@@ -16,15 +14,14 @@ function createRoute(
   path: string,
   config: HttpConfig
 ): MethodDecorator {
-  const { middlewares, wrap } = config;
+  const { middlewares } = config;
 
   return (target, name) => {
     routes.add(target.constructor, {
       http,
       name,
       middlewares,
-      path,
-      wrap
+      path
     });
   };
 }
