@@ -1,11 +1,11 @@
 import { Either } from '@xofttion/utils';
 import { Request, Response } from 'express';
-import { EitherController } from './types';
+import { Result } from './types';
 
 type Call = (
   request: Request,
   response: Response
-) => Promise<EitherController | any>;
+) => Promise<Result | any>;
 
 type WrapOptions = {
   call: Call;

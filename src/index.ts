@@ -1,5 +1,3 @@
-import coopplins from './server';
-
 export {
   Body,
   Controller,
@@ -13,6 +11,5 @@ export {
   Put,
   QueryParam
 } from './decorators';
-export { OnMiddleware, EitherController } from './types';
-
-export default coopplins;
+export { Coopplins } from './server';
+export { OnMiddleware, Result } from './types';
