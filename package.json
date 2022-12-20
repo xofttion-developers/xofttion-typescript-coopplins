@@ -23,7 +23,6 @@
     "typeorm": "^0.3.10"
   },
   "peerDependencies": {
-    "@xofttion/clean-architecture": "^4.0.2",
     "@xofttion/dependency-injection": "^4.0.1",
     "@xofttion/utils": "^4.0.3"
   },
