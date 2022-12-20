@@ -103,7 +103,7 @@ function _createRouteCall(
     return await resolver(...routeArguments);
   };
 
-  const production = coopplins.environment<boolean>('PRODUCTION');
+  const production = Coopplins.environment<boolean>('PRODUCTION');
 
   return async (request: Request, response: Response) => {
     wrapStandard({ request, response, call, production });
@@ -113,7 +113,10 @@ function _createRouteCall(
 function _createRouteArguments(config: ArgumentsConfig): any[] {
   const { controller, functionKey, request } = config;
 
-  const argumentsCollection = ArgumentsStore.get(controller, functionKey);
+  const argumentsCollection = ArgumentsStore.get(
+    controller.constructor,
+    functionKey
+  );
 
   const argumentsValue: any[] = [];
 
@@ -126,7 +129,6 @@ function _createRouteArguments(config: ArgumentsConfig): any[] {
         break;
       case 'HEADER':
         argumentsValue.push(key ? request.headers[key] : undefined);
-
         break;
       case 'QUERY':
         argumentsValue.push(key ? request.query[key] : undefined);
@@ -165,7 +167,7 @@ function _createMiddlewareCall(middleware: Function): Optional<RequestHandler> {
   );
 }
 
-class Coopplins {
+class CoopplinsServer {
   public controllers(controllers: Function[]): void {
     _registerControllers(controllers);
   }
@@ -189,6 +191,4 @@ class Coopplins {
   }
 }
 
-const coopplins = new Coopplins();
-
-export default coopplins;
+export const Coopplins = new CoopplinsServer();
