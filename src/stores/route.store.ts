@@ -1,28 +1,28 @@
 import { RouteConfig } from '../types';
 
-type ConfigMap = Map<string, RouteConfig>;
-type ControllerMap = Map<Function, ConfigMap>;
+type RouteConfigMap = Map<string, RouteConfig>;
+type ControllerMap = Map<Function, RouteConfigMap>;
 
 class RouteStore {
   private _collection: ControllerMap = new Map();
 
   public add(controller: Function, config: RouteConfig): void {
-    const controllerMap = this._getControllerMap(controller);
+    const routeMap = this._getRouteMap(controller);
 
-    controllerMap.set(config.path, config);
+    routeMap.set(config.path, config);
   }
 
   public get(controller: Function): RouteConfig[] {
-    const controllerMap = this._getControllerMap(controller);
+    const routeMap = this._getRouteMap(controller);
 
-    return Array.from(controllerMap.values());
+    return Array.from(routeMap.values());
   }
 
-  private _getControllerMap(controller: Function): ConfigMap {
-    const currentConfig = this._collection.get(controller);
+  private _getRouteMap(controller: Function): RouteConfigMap {
+    const currentRoute = this._collection.get(controller);
 
-    if (currentConfig) {
-      return currentConfig;
+    if (currentRoute) {
+      return currentRoute;
     }
 
     const routeConfig = new Map<string, RouteConfig>();
@@ -33,4 +33,4 @@ class RouteStore {
   }
 }
 
-export const routesStore = new RouteStore();
+export const RoutesStore = new RouteStore();
