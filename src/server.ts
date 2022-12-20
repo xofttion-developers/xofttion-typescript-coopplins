@@ -1,14 +1,25 @@
 import InjectableFactory from '@xofttion/dependency-injection';
-import { parse } from '@xofttion/utils';
+import { Optional, parse } from '@xofttion/utils';
 import dotenv, { DotenvConfigOptions } from 'dotenv';
 import express, { Express, NextFunction, Request, Response, Router } from 'express';
 import { RequestHandler } from 'express-serve-static-core';
-import { controllers, middlewares, routes } from './stores';
+import {
+  ArgumentsStore,
+  ControllersStore,
+  MiddlewaresStore,
+  RoutesStore
+} from './stores';
 import { ControllerConfig, OnMiddleware, RouteConfig } from './types';
 import { wrapStandard } from './wrap';
 
 type ControllerType = { [key: string | symbol]: Function };
 type RouteCallback = (request: Request, response: Response) => Promise<any>;
+
+type ArgumentsConfig = {
+  controller: any;
+  functionKey: string | symbol;
+  request: Request;
+};
 
 const server: Express = express();
 
@@ -19,14 +30,14 @@ function _startServer(port: number, call: () => void): void {
 
 function _registerControllers(_controllers: Function[]): void {
   for (const controllerFn of _controllers) {
-    const controllerConfig = controllers.get(controllerFn);
+    const controllerConfig = ControllersStore.get(controllerFn);
 
     if (controllerConfig) {
       const controller = InjectableFactory<ControllerType>(controllerFn);
 
       const routerController = _createRouterController(controllerConfig);
 
-      const routesConfig = routes.get(controllerFn);
+      const routesConfig = RoutesStore.get(controllerFn);
 
       for (const routeConfig of routesConfig) {
         const routeHttp = _createRouteHttp(routerController, routeConfig);
@@ -51,8 +62,8 @@ function _createRouterController(config: ControllerConfig): Router {
   for (const middleware of config.middlewares) {
     const middlerareCall = _createMiddlewareCall(middleware);
 
-    if (middlerareCall) {
-      routerController.use(middlerareCall);
+    if (middlerareCall.isPresent()) {
+      routerController.use(middlerareCall.get());
     }
   }
 
@@ -80,10 +91,16 @@ function _createRouteCall(
   controller: ControllerType,
   config: RouteConfig
 ): RouteCallback {
-  const call = async (request: Request, response: Response) => {
-    const resolver = controller[config.name].bind(controller);
+  const { functionKey } = config;
 
-    return await resolver(request, response);
+  const call = async (request: Request, response: Response) => {
+    const resolver = controller[functionKey].bind(controller);
+
+    const values = _createRouteArguments({ controller, functionKey, request });
+
+    const routeArguments = [...values, request, response];
+
+    return await resolver(...routeArguments);
   };
 
   const production = coopplins.environment<boolean>('PRODUCTION');
@@ -93,30 +110,59 @@ function _createRouteCall(
   };
 }
 
+function _createRouteArguments(config: ArgumentsConfig): any[] {
+  const { controller, functionKey, request } = config;
+
+  const argumentsCollection = ArgumentsStore.get(controller, functionKey);
+
+  const argumentsValue: any[] = [];
+
+  for (const argumentConfig of argumentsCollection) {
+    const { key, type } = argumentConfig;
+
+    switch (type) {
+      case 'BODY':
+        argumentsValue.push(key ? request.body[key] : request.body);
+        break;
+      case 'HEADER':
+        argumentsValue.push(key ? request.headers[key] : undefined);
+
+        break;
+      case 'QUERY':
+        argumentsValue.push(key ? request.query[key] : undefined);
+        break;
+    }
+  }
+
+  return argumentsValue;
+}
+
 function _createRouteMiddleware(config: RouteConfig): Function[] {
   const routeMiddlerares = [];
 
   for (const middleware of config.middlewares) {
     const middlerareCall = _createMiddlewareCall(middleware);
 
-    if (middlerareCall) {
-      routeMiddlerares.push(middlerareCall);
+    if (middlerareCall.isPresent()) {
+      routeMiddlerares.push(middlerareCall.get());
     }
   }
 
   return routeMiddlerares;
 }
 
-function _createMiddlewareCall(middleware: Function): RequestHandler | undefined {
-  if (!middlewares.has(middleware)) {
-    return undefined;
+function _createMiddlewareCall(middleware: Function): Optional<RequestHandler> {
+  if (!MiddlewaresStore.has(middleware)) {
+    return Optional.empty();
   }
 
   const middlewareCall = InjectableFactory<OnMiddleware>(middleware);
 
-  return async (request: Request, response: Response, next: NextFunction) => {
-    return middlewareCall.call(request, response, next);
-  };
+  return Optional.of(
+    async (request: Request, response: Response, next: NextFunction) => {
+      return middlewareCall.call(request, response, next);
+    }
+  );
 }
 
 class Coopplins {
