@@ -184,7 +184,10 @@ class CoopplinsServer {
     server.use(handlers);
   }
 
-  public environment<T>(key: string, options?: Partial<DotenvConfigOptions>): T {
+  public environment<T = string>(
+    key: string,
+    options?: Partial<DotenvConfigOptions>
+  ): T {
     dotenv.config(options);
 
     return parse<T>(String(process.env[key]));
