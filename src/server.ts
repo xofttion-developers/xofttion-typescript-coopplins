@@ -10,7 +10,7 @@ import {
   RoutesStore
 } from './stores';
 import { ControllerConfig, OnMiddleware, RouteConfig } from './types';
-import { wrapStandard } from './wrap';
+import { wrap } from './wrap';
 
 type ControllerType = { [key: string | symbol]: Function };
 type RouteCallback = (request: Request, response: Response) => Promise<any>;
@@ -106,7 +106,7 @@ function _createRouteCall(
   const production = Coopplins.environment<boolean>('PRODUCTION');
 
   return async (request: Request, response: Response) => {
-    wrapStandard({ request, response, call, production });
+    wrap({ request, response, call, production });
   };
 }
 

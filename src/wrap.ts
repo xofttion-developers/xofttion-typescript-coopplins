@@ -1,11 +1,8 @@
 import { Either } from '@xofttion/utils';
 import { Request, Response } from 'express';
-import { Result } from './types';
+import { HTTP_CODE, Result } from './types';
 
-type Call = (
-  request: Request,
-  response: Response
-) => Promise<Result | any>;
+type Call = (req: Request, res: Response) => Promise<Result | any>;
 
 type WrapOptions = {
   call: Call;
@@ -14,7 +11,7 @@ type WrapOptions = {
   response: Response;
 };
 
-export async function wrapStandard(options: WrapOptions): Promise<any> {
+export async function wrap(options: WrapOptions): Promise<any> {
   const { request, response, call, production } = options;
 
   try {
@@ -23,26 +20,22 @@ export async function wrapStandard(options: WrapOptions): Promise<any> {
     if (controllerResult instanceof Either) {
       controllerResult.fold({
         right: (result) => {
-          response.status(200).json(result);
+          response.status(HTTP_CODE.OK).json(result);
         },
         left: (result) => {
           response.status(result.statusCode).json(result.data);
         }
       });
     } else {
-      response.status(200).json(controllerResult);
+      response.status(HTTP_CODE.OK).json(controllerResult);
     }
   } catch (ex) {
-    wrapException(response, ex, production);
+    if (!production) {
+      console.log(ex);
+    }
+  
+    response.status(HTTP_CODE.INTERNAL_SERVER_ERROR).json({
+      message: 'An error occurred during the execution of the process'
+    });
   }
-}
-
-function wrapException(response: Response, exception: any, production?: boolean) {
-  if (!production) {
-    console.log(exception);
-  }
-
-  response.status(500).json({
-    message: 'An error occurred during the execution of the process'
-  });
 }
