@@ -9,7 +9,9 @@ class RouteStore {
   public add(controller: Function, config: RouteConfig): void {
     const routeMap = this._getRouteMap(controller);
 
-    routeMap.set(config.path, config);
+    const { http, path } = config;
+
+    routeMap.set(`${http}:${path}`, config);
   }
 
   public get(controller: Function): RouteConfig[] {
@@ -25,11 +27,11 @@ class RouteStore {
       return currentRoute;
     }
 
-    const routeConfig = new Map<string, RouteConfig>();
+    const routeMap = new Map<string, RouteConfig>();
 
-    this._collection.set(controller, routeConfig);
+    this._collection.set(controller, routeMap);
 
-    return routeConfig;
+    return routeMap;
   }
 }
 

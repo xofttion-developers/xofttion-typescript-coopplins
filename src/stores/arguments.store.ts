@@ -37,11 +37,11 @@ class ArgumentStore {
       return currentFunction;
     }
 
-    const functionConfig = new Map<string | symbol, ArgumentsConfig[]>();
+    const functionMap = new Map<string | symbol, ArgumentsConfig[]>();
 
-    this._collection.set(controller, functionConfig);
+    this._collection.set(controller, functionMap);
 
-    return functionConfig;
+    return functionMap;
   }
 }
 
