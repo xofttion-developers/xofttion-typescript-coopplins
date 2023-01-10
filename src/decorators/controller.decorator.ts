@@ -7,6 +7,7 @@ export function Controller(
 ): ClassDecorator {
   return (target) => {
     ControllersStore.add(target, { basePath, middlewares });
-    createInjectable(target);
+
+    createInjectable({ target, singleton: true });
   };
 }

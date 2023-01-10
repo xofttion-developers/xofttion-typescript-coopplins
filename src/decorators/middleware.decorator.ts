@@ -5,6 +5,6 @@ export function Middleware(): ClassDecorator {
   return (target) => {
     MiddlewaresStore.add(target);
 
-    createInjectable(target);
+    createInjectable({ target, singleton: true });
   };
 }

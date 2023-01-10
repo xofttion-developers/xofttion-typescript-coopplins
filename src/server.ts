@@ -1,4 +1,4 @@
-import InjectableFactory from '@xofttion/dependency-injection';
+import InjectionFactory from '@xofttion/dependency-injection';
 import { Optional, parse } from '@xofttion/utils';
 import dotenv, { DotenvConfigOptions } from 'dotenv';
 import express, { Express, NextFunction, Request, Response, Router } from 'express';
@@ -33,7 +33,7 @@ function _registerControllers(_controllers: Function[]): void {
     const controllerConfig = ControllersStore.get(controllerFn);
 
     if (controllerConfig) {
-      const controller = InjectableFactory<ControllerType>(controllerFn);
+      const controller = InjectionFactory<ControllerType>(controllerFn);
 
       const routerController = _createRouterController(controllerConfig);
 
@@ -140,29 +140,30 @@ function _createRouteArguments(config: ArgumentsConfig): any[] {
 }
 
 function _createRouteMiddleware(config: RouteConfig): Function[] {
+  const { middlewares } = config;
   const routeMiddlerares = [];
 
-  for (const middleware of config.middlewares) {
-    const middlerareCall = _createMiddlewareCall(middleware);
+  for (const middleware of middlewares) {
+    const call = _createMiddlewareCall(middleware);
 
-    if (middlerareCall.isPresent()) {
-      routeMiddlerares.push(middlerareCall.get());
+    if (call.isPresent()) {
+      routeMiddlerares.push(call.get());
     }
   }
 
   return routeMiddlerares;
 }
 
-function _createMiddlewareCall(middleware: Function): Optional<RequestHandler> {
-  if (!MiddlewaresStore.has(middleware)) {
+function _createMiddlewareCall(middlewareRef: Function): Optional<RequestHandler> {
+  if (!MiddlewaresStore.has(middlewareRef)) {
     return Optional.empty();
   }
 
-  const middlewareCall = InjectableFactory<OnMiddleware>(middleware);
+  const middleware = InjectionFactory<OnMiddleware>(middlewareRef);
 
   return Optional.of(
     async (request: Request, response: Response, next: NextFunction) => {
-      return middlewareCall.call(request, response, next);
+      return middleware.call(request, response, next);
     }
   );
 }
