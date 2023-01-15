@@ -1,4 +1,4 @@
-export type ArgumentsType = 'BODY' | 'HEADER' | 'QUERY';
+export type ArgumentsType = 'BODY' | 'HEADER'| 'PATH' | 'QUERY';
 
 export type ArgumentsConfig = {
   functionKey: string | symbol;

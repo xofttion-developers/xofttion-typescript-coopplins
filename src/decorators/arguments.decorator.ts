@@ -1,6 +1,5 @@
 import { ArgumentsStore } from '../stores';
 
-export function Body(): Function;
 export function Body(key?: string): ParameterDecorator {
   return (target, functionKey, index) => {
     ArgumentsStore.add(target.constructor, {
@@ -19,6 +18,17 @@ export function Header(key: string): ParameterDecorator {
       index,
       key,
       type: 'HEADER'
+    });
+  };
+}
+
+export function PathParam(key: string): ParameterDecorator {
+  return (target, functionKey, index) => {
+    ArgumentsStore.add(target.constructor, {
+      functionKey,
+      index,
+      key,
+      type: 'PATH'
     });
   };
 }

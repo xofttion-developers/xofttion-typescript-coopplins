@@ -1,4 +1,4 @@
-import InjectableFactory from '@xofttion/dependency-injection';
+import InjectionFactory from '@xofttion/dependency-injection';
 import { Optional, parse } from '@xofttion/utils';
 import dotenv, { DotenvConfigOptions } from 'dotenv';
 import express, { Express, NextFunction, Request, Response, Router } from 'express';
@@ -28,43 +28,44 @@ function _startServer(port: number, call: () => void): void {
   server.listen(port, call);
 }
 
-function _registerControllers(_controllers: Function[]): void {
-  for (const controllerFn of _controllers) {
-    const controllerConfig = ControllersStore.get(controllerFn);
+function _registerControllers(controllers: Function[]): void {
+  for (const controller of controllers) {
+    const config = ControllersStore.get(controller);
 
-    if (controllerConfig) {
-      const controller = InjectableFactory<ControllerType>(controllerFn);
+    if (config) {
+      const instance = InjectionFactory<ControllerType>(controller);
 
-      const routerController = _createRouterController(controllerConfig);
+      const routerController = _createRouterController(config);
 
-      const routesConfig = RoutesStore.get(controllerFn);
+      const routesConfig = RoutesStore.get(controller);
 
       for (const routeConfig of routesConfig) {
         const routeHttp = _createRouteHttp(routerController, routeConfig);
 
         if (routeHttp) {
-          const routeMiddlerares = _createRouteMiddleware(routeConfig);
+          const middlerares = _createRouteMiddleware(routeConfig);
 
-          const routeCall = _createRouteCall(controller, routeConfig);
+          const routeCall = _createRouteCall(instance, routeConfig);
 
-          routeHttp(routeConfig.path, [...routeMiddlerares, routeCall]);
+          routeHttp(routeConfig.path, [...middlerares, routeCall]);
         }
       }
 
-      server.use(controllerConfig.basePath, routerController);
+      server.use(config.basePath, routerController);
     }
   }
 }
 
 function _createRouterController(config: ControllerConfig): Router {
   const routerController = express.Router();
+  const { middlewares } = config;
 
-  for (const middleware of config.middlewares) {
-    const middlerareCall = _createMiddlewareCall(middleware);
+  for (const middleware of middlewares) {
+    const optional = _createMiddlewareCall(middleware);
 
-    if (middlerareCall.isPresent()) {
-      routerController.use(middlerareCall.get());
-    }
+    optional.present((call) => {
+      routerController.use(call);
+    });
   }
 
   return routerController;
@@ -113,56 +114,57 @@ function _createRouteCall(
 function _createRouteArguments(config: ArgumentsConfig): any[] {
   const { controller, functionKey, request } = config;
 
-  const argumentsCollection = ArgumentsStore.get(
-    controller.constructor,
-    functionKey
-  );
+  const collection = ArgumentsStore.get(controller.constructor, functionKey);
 
-  const argumentsValue: any[] = [];
+  const values: any[] = [];
 
-  for (const argumentConfig of argumentsCollection) {
+  for (const argumentConfig of collection) {
     const { key, type } = argumentConfig;
 
     switch (type) {
       case 'BODY':
-        argumentsValue.push(key ? request.body[key] : request.body);
+        values.push(key ? request.body[key] : request.body);
         break;
       case 'HEADER':
-        argumentsValue.push(key ? request.headers[key] : undefined);
+        values.push(key ? request.headers[key] : undefined);
+        break;
+      case 'PATH':
+        values.push(key ? request.params[key] : undefined);
         break;
       case 'QUERY':
-        argumentsValue.push(key ? request.query[key] : undefined);
+        values.push(key ? request.query[key] : undefined);
         break;
     }
   }
 
-  return argumentsValue;
+  return values;
 }
 
 function _createRouteMiddleware(config: RouteConfig): Function[] {
-  const routeMiddlerares = [];
+  const routeMiddlerares: any[] = [];
+  const { middlewares } = config;
 
-  for (const middleware of config.middlewares) {
-    const middlerareCall = _createMiddlewareCall(middleware);
+  for (const middleware of middlewares) {
+    const optional = _createMiddlewareCall(middleware);
 
-    if (middlerareCall.isPresent()) {
-      routeMiddlerares.push(middlerareCall.get());
-    }
+    optional.present((call) => {
+      routeMiddlerares.push(call);
+    });
   }
 
   return routeMiddlerares;
 }
 
-function _createMiddlewareCall(middleware: Function): Optional<RequestHandler> {
-  if (!MiddlewaresStore.has(middleware)) {
+function _createMiddlewareCall(middlewareRef: Function): Optional<RequestHandler> {
+  if (!MiddlewaresStore.has(middlewareRef)) {
     return Optional.empty();
   }
 
-  const middlewareCall = InjectableFactory<OnMiddleware>(middleware);
+  const middleware = InjectionFactory<OnMiddleware>(middlewareRef);
 
   return Optional.of(
     async (request: Request, response: Response, next: NextFunction) => {
-      return middlewareCall.call(request, response, next);
+      return middleware.call(request, response, next);
     }
   );
 }
