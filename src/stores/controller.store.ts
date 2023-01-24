@@ -1,16 +1,16 @@
 import { ControllerConfig } from '../types';
 
-type ConfigMap = Map<Function, ControllerConfig>;
+type ControllerMap = Map<Function, ControllerConfig>;
 
 class ControllerStore {
-  private _collection: ConfigMap = new Map();
+  private collection: ControllerMap = new Map();
 
   public add(controller: Function, config: ControllerConfig): void {
-    this._collection.set(controller, config);
+    this.collection.set(controller, config);
   }
 
   public get(controller: Function): ControllerConfig | undefined {
-    return this._collection.get(controller);
+    return this.collection.get(controller);
   }
 }
 

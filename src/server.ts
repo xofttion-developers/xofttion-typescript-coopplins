@@ -23,29 +23,28 @@ type ArgumentsConfig = {
 
 const server: Express = express();
 
-function _startServer(port: number, call: () => void): void {
-  server.use(express.json());
+function startServer(port: number, call: () => void): void {
   server.listen(port, call);
 }
 
-function _registerControllers(controllers: Function[]): void {
+function registerControllers(controllers: Function[]): void {
   for (const controller of controllers) {
     const config = ControllersStore.get(controller);
 
     if (config) {
       const instance = InjectionFactory<ControllerType>(controller);
 
-      const routerController = _createRouterController(config);
+      const routerController = createRouterController(config);
 
       const routesConfig = RoutesStore.get(controller);
 
       for (const routeConfig of routesConfig) {
-        const routeHttp = _createRouteHttp(routerController, routeConfig);
+        const routeHttp = createRouteHttp(routerController, routeConfig);
 
         if (routeHttp) {
-          const middlerares = _createRouteMiddleware(routeConfig);
+          const middlerares = createRouteMiddleware(routeConfig);
 
-          const routeCall = _createRouteCall(instance, routeConfig);
+          const routeCall = createRouteCall(instance, routeConfig);
 
           routeHttp(routeConfig.path, [...middlerares, routeCall]);
         }
@@ -56,14 +55,12 @@ function _registerControllers(controllers: Function[]): void {
   }
 }
 
-function _createRouterController(config: ControllerConfig): Router {
+function createRouterController(config: ControllerConfig): Router {
   const routerController = express.Router();
   const { middlewares } = config;
 
   for (const middleware of middlewares) {
-    const optional = _createMiddlewareCall(middleware);
-
-    optional.present((call) => {
+    createMiddlewareCall(middleware).present((call) => {
       routerController.use(call);
     });
   }
@@ -71,7 +68,7 @@ function _createRouterController(config: ControllerConfig): Router {
   return routerController;
 }
 
-function _createRouteHttp(router: Router, config: RouteConfig): Function {
+function createRouteHttp(router: Router, config: RouteConfig): Function {
   switch (config.http) {
     case 'POST':
       return router.post.bind(router);
@@ -88,7 +85,7 @@ function _createRouteHttp(router: Router, config: RouteConfig): Function {
   }
 }
 
-function _createRouteCall(
+function createRouteCall(
   controller: ControllerType,
   config: RouteConfig
 ): RouteCallback {
@@ -97,11 +94,11 @@ function _createRouteCall(
   const call = async (request: Request, response: Response) => {
     const resolver = controller[functionKey].bind(controller);
 
-    const values = _createRouteArguments({ controller, functionKey, request });
+    const values = createRouteArguments({ controller, functionKey, request });
 
     const routeArguments = [...values, request, response];
 
-    return await resolver(...routeArguments);
+    return resolver(...routeArguments);
   };
 
   const production = Coopplins.environment<boolean>('PRODUCTION');
@@ -111,7 +108,7 @@ function _createRouteCall(
   };
 }
 
-function _createRouteArguments(config: ArgumentsConfig): any[] {
+function createRouteArguments(config: ArgumentsConfig): any[] {
   const { controller, functionKey, request } = config;
 
   const collection = ArgumentsStore.get(controller.constructor, functionKey);
@@ -140,14 +137,12 @@ function _createRouteArguments(config: ArgumentsConfig): any[] {
   return values;
 }
 
-function _createRouteMiddleware(config: RouteConfig): Function[] {
+function createRouteMiddleware(config: RouteConfig): Function[] {
   const routeMiddlerares: any[] = [];
   const { middlewares } = config;
 
   for (const middleware of middlewares) {
-    const optional = _createMiddlewareCall(middleware);
-
-    optional.present((call) => {
+    createMiddlewareCall(middleware).present((call) => {
       routeMiddlerares.push(call);
     });
   }
@@ -155,7 +150,7 @@ function _createRouteMiddleware(config: RouteConfig): Function[] {
   return routeMiddlerares;
 }
 
-function _createMiddlewareCall(middlewareRef: Function): Optional<RequestHandler> {
+function createMiddlewareCall(middlewareRef: Function): Optional<RequestHandler> {
   if (!MiddlewaresStore.has(middlewareRef)) {
     return Optional.empty();
   }
@@ -171,12 +166,12 @@ function _createMiddlewareCall(middlewareRef: Function): Optional<RequestHandler
 
 class CoopplinsServer {
   public controllers(controllers: Function[]): void {
-    _registerControllers(controllers);
+    registerControllers(controllers);
   }
 
   public start(port: number, call: () => void): void {
     try {
-      _startServer(port, call);
+      startServer(port, call);
     } catch (error) {
       console.error(error);
     }

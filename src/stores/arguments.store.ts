@@ -1,37 +1,37 @@
 import { ArgumentsConfig } from '../types';
 
-type FunctionConfigMap = Map<string | symbol, ArgumentsConfig[]>;
-type ControllerMap = Map<Function, FunctionConfigMap>;
+type FunctionMap = Map<string | symbol, ArgumentsConfig[]>;
+type ControllerMap = Map<Function, FunctionMap>;
 
 class ArgumentStore {
-  private _collection: ControllerMap = new Map();
+  private collection: ControllerMap = new Map();
 
   public add(controller: Function, config: ArgumentsConfig): void {
     const { functionKey, index } = config;
 
-    const argumentsCollection = this.get(controller, functionKey);
+    const argsCollection = this.get(controller, functionKey);
 
-    argumentsCollection[index] = config;
+    argsCollection[index] = config;
   }
 
   public get(controller: Function, functionKey: string | symbol): ArgumentsConfig[] {
-    const functionMap = this._getFunctionMap(controller);
+    const functionMap = this.getFunctionMap(controller);
 
-    const currentArguments = functionMap.get(functionKey);
+    const currentArgs = functionMap.get(functionKey);
 
-    if (currentArguments) {
-      return currentArguments;
+    if (currentArgs) {
+      return currentArgs;
     }
 
-    const argumentsCollection: ArgumentsConfig[] = [];
+    const argsCollection: ArgumentsConfig[] = [];
 
-    functionMap.set(functionKey, argumentsCollection);
+    functionMap.set(functionKey, argsCollection);
 
-    return argumentsCollection;
+    return argsCollection;
   }
 
-  private _getFunctionMap(controller: Function): FunctionConfigMap {
-    const currentFunction = this._collection.get(controller);
+  private getFunctionMap(controller: Function): FunctionMap {
+    const currentFunction = this.collection.get(controller);
 
     if (currentFunction) {
       return currentFunction;
@@ -39,7 +39,7 @@ class ArgumentStore {
 
     const functionMap = new Map<string | symbol, ArgumentsConfig[]>();
 
-    this._collection.set(controller, functionMap);
+    this.collection.set(controller, functionMap);
 
     return functionMap;
   }
