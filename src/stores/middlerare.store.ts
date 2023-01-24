@@ -1,12 +1,12 @@
 class MiddlewareStore {
-  private _collection: Function[] = [];
+  private collection: Function[] = [];
 
   public add(middleware: Function): void {
-    this._collection.push(middleware);
+    this.collection.push(middleware);
   }
 
   public has(middleware: Function): boolean {
-    return this._collection.includes(middleware);
+    return this.collection.includes(middleware);
   }
 }
 
