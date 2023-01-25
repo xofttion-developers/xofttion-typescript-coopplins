@@ -15,20 +15,20 @@ export async function wrap(options: WrapOptions): Promise<any> {
   const { request, response, call, production } = options;
 
   try {
-    call(request, response).then((resultController) => {
-      if (resultController instanceof Either) {
-        resultController.fold({
-          right: (result) => {
-            response.status(HTTP_CODE.OK).json(result);
-          },
-          left: (result) => {
-            response.status(result.statusCode).json(result.data);
-          }
-        });
-      } else {
-        response.status(HTTP_CODE.OK).json(resultController);
-      }
-    });
+    const result = await call(request, response);
+
+    if (result instanceof Either) {
+      result.fold({
+        right: (data) => {
+          response.status(HTTP_CODE.OK).json(data);
+        },
+        left: ({ statusCode, data }) => {
+          response.status(statusCode).json(data);
+        }
+      });
+    } else {
+      response.status(HTTP_CODE.OK).json(result);
+    }
   } catch (ex) {
     if (!production) {
       console.log(ex);
