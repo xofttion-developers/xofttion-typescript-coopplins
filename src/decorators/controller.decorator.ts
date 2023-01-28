@@ -1,12 +1,12 @@
 import { createInjectable } from '@xofttion/dependency-injection';
-import { ControllersStore } from '../stores';
+import { controllersStore } from '../stores';
 
 export function Controller(
   basePath = '/',
   middlewares: Function[] = []
 ): ClassDecorator {
   return (target) => {
-    ControllersStore.add(target, { basePath, middlewares });
+    controllersStore.add(target, { basePath, middlewares });
 
     createInjectable({ target, singleton: true });
   };

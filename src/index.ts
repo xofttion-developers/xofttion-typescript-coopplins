@@ -12,5 +12,5 @@ export {
   QueryParam
 } from './decorators';
 export * from './results';
-export { Coopplins } from './server';
+export { coopplins, environment } from './server';
 export { OnMiddleware, Result } from './types';

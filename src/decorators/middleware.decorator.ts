@@ -1,9 +1,9 @@
 import { createInjectable } from '@xofttion/dependency-injection';
-import { MiddlewaresStore } from '../stores';
+import { middlewaresStore } from '../stores';
 
 export function Middleware(): ClassDecorator {
   return (target) => {
-    MiddlewaresStore.add(target);
+    middlewaresStore.add(target);
 
     createInjectable({ target, singleton: true });
   };

@@ -35,4 +35,4 @@ class RouteStore {
   }
 }
 
-export const RoutesStore = new RouteStore();
+export const routesStore = new RouteStore();
