@@ -5,7 +5,13 @@ import express, { Express, NextFunction, Request, Response, Router } from 'expre
 import { RequestHandler } from 'express-serve-static-core';
 import { validationResult } from 'express-validator';
 import { args, controllers, middlewares, routes } from './stores';
-import { ControllerConfig, HTTP_CODE, OnMiddleware, RouteConfig } from './types';
+import {
+  ControllerConfig,
+  HTTP_CODE,
+  MiddlewareType,
+  OnMiddleware,
+  RouteConfig
+} from './types';
 import { wrap } from './wrap';
 
 type ControllerType = { [key: string | symbol]: Function };
@@ -148,9 +154,13 @@ function createRouteMiddleware(config: RouteConfig): Function[] {
   return routeMiddlewares;
 }
 
-function createMiddleware(ref: Function): Optional<RequestHandler> {
-  if (middlewares.has(ref)) {
-    const middleware = InjectionFactory(ref);
+function createMiddleware(ref: MiddlewareType): Optional<RequestHandler> {
+  if (typeof ref === 'object') {
+    return Optional.of(ref as unknown as RequestHandler);
+  }
+
+  if (middlewares.has(ref as Function)) {
+    const middleware = InjectionFactory(ref as Function);
 
     return isMiddleware(middleware)
       ? Optional.of(
@@ -163,7 +173,7 @@ function createMiddleware(ref: Function): Optional<RequestHandler> {
 
   return Optional.of(
     async (request: Request, response: Response, next: NextFunction) => {
-      return ref(request, response, next);
+      return (ref as Function)(request, response, next);
     }
   );
 }
