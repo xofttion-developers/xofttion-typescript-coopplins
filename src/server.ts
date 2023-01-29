@@ -3,69 +3,79 @@ import { Optional, parse } from '@xofttion/utils';
 import dotenv, { DotenvConfigOptions } from 'dotenv';
 import express, { Express, NextFunction, Request, Response, Router } from 'express';
 import { RequestHandler } from 'express-serve-static-core';
+import { validationResult } from 'express-validator';
+import { args, controllers, middlewares, routes } from './stores';
 import {
-  ArgumentsStore,
-  ControllersStore,
-  MiddlewaresStore,
-  RoutesStore
-} from './stores';
-import { ControllerConfig, OnMiddleware, RouteConfig } from './types';
+  ControllerConfig,
+  HTTP_CODE,
+  MiddlewareType,
+  OnMiddleware,
+  RouteConfig
+} from './types';
 import { wrap } from './wrap';
 
 type ControllerType = { [key: string | symbol]: Function };
+type Options = Partial<DotenvConfigOptions>;
 type RouteCallback = (request: Request, response: Response) => Promise<any>;
+
+type DecoratorConfig = {
+  decorators: Function[];
+  error?: (ex: unknown) => void;
+  server: Express;
+};
+
+type CallbackConfig = {
+  controller: ControllerType;
+  error?: (ex: unknown) => void;
+  routeConfig: RouteConfig;
+};
 
 type ArgumentsConfig = {
   controller: any;
-  functionKey: string | symbol;
+  key: string | symbol;
   request: Request;
 };
 
-const server: Express = express();
+function registerDecorators(config: DecoratorConfig): void {
+  const { decorators, error, server } = config;
 
-function startServer(port: number, call: () => void): void {
-  server.listen(port, call);
-}
+  for (const decorator of decorators) {
+    const controllerConfig = controllers.get(decorator);
 
-function registerControllers(controllers: Function[]): void {
-  for (const controller of controllers) {
-    const config = ControllersStore.get(controller);
+    if (controllerConfig) {
+      const controller = InjectionFactory<ControllerType>(decorator);
+      const router = createRouterController(controllerConfig);
 
-    if (config) {
-      const instance = InjectionFactory<ControllerType>(controller);
-
-      const routerController = createRouterController(config);
-
-      const routesConfig = RoutesStore.get(controller);
+      const routesConfig = routes.get(decorator);
 
       for (const routeConfig of routesConfig) {
-        const routeHttp = createRouteHttp(routerController, routeConfig);
+        const routeHttp = createRouteHttp(router, routeConfig);
 
         if (routeHttp) {
           const middlerares = createRouteMiddleware(routeConfig);
 
-          const routeCall = createRouteCall(instance, routeConfig);
+          const routeCall = createCallback({ controller, routeConfig, error });
 
           routeHttp(routeConfig.path, [...middlerares, routeCall]);
         }
       }
 
-      server.use(config.basePath, routerController);
+      server.use(controllerConfig.basePath, router);
     }
   }
 }
 
 function createRouterController(config: ControllerConfig): Router {
-  const routerController = express.Router();
+  const router = express.Router();
   const { middlewares } = config;
 
   for (const middleware of middlewares) {
-    createMiddlewareCall(middleware).present((call) => {
-      routerController.use(call);
+    createMiddleware(middleware).present((call) => {
+      router.use(call);
     });
   }
 
-  return routerController;
+  return router;
 }
 
 function createRouteHttp(router: Router, config: RouteConfig): Function {
@@ -85,39 +95,33 @@ function createRouteHttp(router: Router, config: RouteConfig): Function {
   }
 }
 
-function createRouteCall(
-  controller: ControllerType,
-  config: RouteConfig
-): RouteCallback {
-  const { functionKey } = config;
+function createCallback(config: CallbackConfig): RouteCallback {
+  const { controller, error, routeConfig } = config;
+  const { key } = routeConfig;
 
-  const call = async (request: Request, response: Response) => {
-    const resolver = controller[functionKey].bind(controller);
+  const callback = async (request: Request, response: Response) => {
+    const resolver = controller[key].bind(controller);
 
-    const values = createRouteArguments({ controller, functionKey, request });
+    const baseArgs = createRouteBaseArgs({ controller, key: key, request });
 
-    const routeArguments = [...values, request, response];
+    const routeArgs = [...baseArgs, request, response];
 
-    return resolver(...routeArguments);
+    return resolver(...routeArgs);
   };
 
-  const production = Coopplins.environment<boolean>('PRODUCTION');
-
   return async (request: Request, response: Response) => {
-    wrap({ request, response, call, production });
+    wrap({ request, response, callback, error });
   };
 }
 
-function createRouteArguments(config: ArgumentsConfig): any[] {
-  const { controller, functionKey, request } = config;
+function createRouteBaseArgs(config: ArgumentsConfig): any[] {
+  const { controller, key, request } = config;
 
-  const collection = ArgumentsStore.get(controller.constructor, functionKey);
+  const argsConfig = args.get(controller.constructor, key);
 
   const values: any[] = [];
 
-  for (const argumentConfig of collection) {
-    const { key, type } = argumentConfig;
-
+  for (const { key, type } of argsConfig) {
     switch (type) {
       case 'BODY':
         values.push(key ? request.body[key] : request.body);
@@ -138,57 +142,104 @@ function createRouteArguments(config: ArgumentsConfig): any[] {
 }
 
 function createRouteMiddleware(config: RouteConfig): Function[] {
-  const routeMiddlerares: any[] = [];
+  const routeMiddlewares: any[] = [];
   const { middlewares } = config;
 
   for (const middleware of middlewares) {
-    createMiddlewareCall(middleware).present((call) => {
-      routeMiddlerares.push(call);
+    createMiddleware(middleware).present((call) => {
+      routeMiddlewares.push(call);
     });
   }
 
-  return routeMiddlerares;
+  return routeMiddlewares;
 }
 
-function createMiddlewareCall(middlewareRef: Function): Optional<RequestHandler> {
-  if (!MiddlewaresStore.has(middlewareRef)) {
-    return Optional.empty();
+function createMiddleware(ref: MiddlewareType): Optional<RequestHandler> {
+  if (typeof ref === 'object') {
+    return Optional.of(ref as unknown as RequestHandler);
   }
 
-  const middleware = InjectionFactory<OnMiddleware>(middlewareRef);
+  if (middlewares.has(ref as Function)) {
+    const middleware = InjectionFactory(ref as Function);
+
+    return isMiddleware(middleware)
+      ? Optional.of(
+          async (request: Request, response: Response, next: NextFunction) => {
+            return middleware.call(request, response, next);
+          }
+        )
+      : Optional.empty();
+  }
 
   return Optional.of(
     async (request: Request, response: Response, next: NextFunction) => {
-      return middleware.call(request, response, next);
+      return (ref as Function)(request, response, next);
     }
   );
 }
 
-class CoopplinsServer {
-  public controllers(controllers: Function[]): void {
-    registerControllers(controllers);
-  }
+function isMiddleware(middleware: any): middleware is OnMiddleware {
+  return typeof middleware['call'] === 'function';
+}
 
-  public start(port: number, call: () => void): void {
+type CoopplinsConfig = Partial<{
+  afterAll?: () => void;
+  beforeAll?: () => Promise<void>;
+  controllers: Function[];
+  handleError?: (ex: unknown) => void;
+  handlers: RequestHandler[];
+}>;
+
+class Coopplins {
+  constructor(private config: CoopplinsConfig) {}
+
+  public async start(port: number): Promise<void> {
+    const { afterAll, beforeAll, controllers, handlers, handleError } = this.config;
+
+    const server: Express = express();
+
+    if (beforeAll) {
+      await beforeAll();
+    }
+
+    if (handlers) {
+      for (const handler of handlers) {
+        server.use(handler);
+      }
+    }
+
+    registerDecorators({
+      decorators: controllers || [],
+      error: handleError,
+      server
+    });
+
     try {
-      startServer(port, call);
+      server.listen(port, afterAll);
     } catch (error) {
       console.error(error);
     }
   }
-
-  public use(...handlers: RequestHandler[]): void {
-    server.use(handlers);
-  }
-
-  public environment<T = string>(
-    key: string,
-    options?: Partial<DotenvConfigOptions>
-  ): T {
-    dotenv.config(options);
-
-    return parse<T>(String(process.env[key]));
-  }
 }
 
-export const Coopplins = new CoopplinsServer();
+export function environment<T = string>(key: string, options?: Options): T {
+  dotenv.config(options);
+
+  return parse<T>(String(process.env[key]));
+}
+
+export function validator(): RequestHandler {
+  return (req: Request, res: Response, next: NextFunction): any => {
+    const errors = validationResult(req);
+
+    if (errors.isEmpty()) {
+      next();
+    } else {
+      return res.status(HTTP_CODE.BAD_REQUEST).send(errors.array());
+    }
+  };
+}
+
+export function coopplins(config: CoopplinsConfig): Coopplins {
+  return new Coopplins(config);
+}

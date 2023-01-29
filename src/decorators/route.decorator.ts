@@ -1,8 +1,8 @@
-import { RoutesStore } from '../stores';
-import { RouteHttp } from '../types';
+import { routes } from '../stores';
+import { MiddlewareType, RouteHttp } from '../types';
 
 type HttpConfig = {
-  middlewares: Function[];
+  middlewares: MiddlewareType[];
 };
 
 const defaultConfig: HttpConfig = {
@@ -17,9 +17,9 @@ function createRoute(
   const { middlewares } = config;
 
   return (target, name) => {
-    RoutesStore.add(target.constructor, {
+    routes.add(target.constructor, {
       http,
-      functionKey: name,
+      key: name,
       middlewares,
       path
     });
