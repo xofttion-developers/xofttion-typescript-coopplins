@@ -1,4 +1,4 @@
-import { routesStore } from '../stores';
+import { routes } from '../stores';
 import { RouteHttp } from '../types';
 
 type HttpConfig = {
@@ -17,7 +17,7 @@ function createRoute(
   const { middlewares } = config;
 
   return (target, name) => {
-    routesStore.add(target.constructor, {
+    routes.add(target.constructor, {
       http,
       key: name,
       middlewares,

@@ -14,4 +14,4 @@ class ControllerStore {
   }
 }
 
-export const controllersStore = new ControllerStore();
+export const controllers = new ControllerStore();

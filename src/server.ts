@@ -3,13 +3,9 @@ import { Optional, parse } from '@xofttion/utils';
 import dotenv, { DotenvConfigOptions } from 'dotenv';
 import express, { Express, NextFunction, Request, Response, Router } from 'express';
 import { RequestHandler } from 'express-serve-static-core';
-import {
-  argsStore,
-  controllersStore,
-  middlewaresStore,
-  routesStore
-} from './stores';
-import { ControllerConfig, OnMiddleware, RouteConfig } from './types';
+import { validationResult } from 'express-validator';
+import { args, controllers, middlewares, routes } from './stores';
+import { ControllerConfig, HTTP_CODE, OnMiddleware, RouteConfig } from './types';
 import { wrap } from './wrap';
 
 type ControllerType = { [key: string | symbol]: Function };
@@ -38,13 +34,13 @@ function registerDecorators(config: DecoratorConfig): void {
   const { decorators, error, server } = config;
 
   for (const decorator of decorators) {
-    const controllerConfig = controllersStore.get(decorator);
+    const controllerConfig = controllers.get(decorator);
 
     if (controllerConfig) {
       const controller = InjectionFactory<ControllerType>(decorator);
       const router = createRouterController(controllerConfig);
 
-      const routesConfig = routesStore.get(decorator);
+      const routesConfig = routes.get(decorator);
 
       for (const routeConfig of routesConfig) {
         const routeHttp = createRouteHttp(router, routeConfig);
@@ -115,7 +111,7 @@ function createCallback(config: CallbackConfig): RouteCallback {
 function createRouteBaseArgs(config: ArgumentsConfig): any[] {
   const { controller, key, request } = config;
 
-  const argsConfig = argsStore.get(controller.constructor, key);
+  const argsConfig = args.get(controller.constructor, key);
 
   const values: any[] = [];
 
@@ -152,18 +148,28 @@ function createRouteMiddleware(config: RouteConfig): Function[] {
   return routeMiddlewares;
 }
 
-function createMiddleware(middlewareRef: Function): Optional<RequestHandler> {
-  if (!middlewaresStore.has(middlewareRef)) {
-    return Optional.empty();
-  }
+function createMiddleware(ref: Function): Optional<RequestHandler> {
+  if (middlewares.has(ref)) {
+    const middleware = InjectionFactory(ref);
 
-  const middleware = InjectionFactory<OnMiddleware>(middlewareRef);
+    return isMiddleware(middleware)
+      ? Optional.of(
+          async (request: Request, response: Response, next: NextFunction) => {
+            return middleware.call(request, response, next);
+          }
+        )
+      : Optional.empty();
+  }
 
   return Optional.of(
     async (request: Request, response: Response, next: NextFunction) => {
-      return middleware.call(request, response, next);
+      return ref(request, response, next);
     }
   );
+}
+
+function isMiddleware(middleware: any): middleware is OnMiddleware {
+  return typeof middleware['call'] === 'function';
 }
 
 type CoopplinsConfig = Partial<{
@@ -210,6 +216,18 @@ export function environment<T = string>(key: string, options?: Options): T {
   dotenv.config(options);
 
   return parse<T>(String(process.env[key]));
+}
+
+export function validator(): RequestHandler {
+  return (req: Request, res: Response, next: NextFunction): any => {
+    const errors = validationResult(req);
+
+    if (errors.isEmpty()) {
+      next();
+    } else {
+      return res.status(HTTP_CODE.BAD_REQUEST).send(errors.array());
+    }
+  };
 }
 
 export function coopplins(config: CoopplinsConfig): Coopplins {

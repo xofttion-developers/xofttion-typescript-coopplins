@@ -45,4 +45,4 @@ class ArgumentStore {
   }
 }
 
-export const argsStore = new ArgumentStore();
+export const args = new ArgumentStore();

@@ -1,8 +1,8 @@
-import { argsStore } from '../stores';
+import { args } from '../stores';
 
 export function Body(key?: string): ParameterDecorator {
   return (target, functionKey, index) => {
-    argsStore.add(target.constructor, {
+    args.add(target.constructor, {
       functionKey,
       index,
       key,
@@ -13,7 +13,7 @@ export function Body(key?: string): ParameterDecorator {
 
 export function Header(key: string): ParameterDecorator {
   return (target, functionKey, index) => {
-    argsStore.add(target.constructor, {
+    args.add(target.constructor, {
       functionKey,
       index,
       key,
@@ -24,7 +24,7 @@ export function Header(key: string): ParameterDecorator {
 
 export function PathParam(key: string): ParameterDecorator {
   return (target, functionKey, index) => {
-    argsStore.add(target.constructor, {
+    args.add(target.constructor, {
       functionKey,
       index,
       key,
@@ -35,7 +35,7 @@ export function PathParam(key: string): ParameterDecorator {
 
 export function QueryParam(key: string): ParameterDecorator {
   return (target, functionKey, index) => {
-    argsStore.add(target.constructor, {
+    args.add(target.constructor, {
       functionKey,
       index,
       key,
