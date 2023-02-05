@@ -99,18 +99,21 @@ function createCallback(config: CallbackConfig): RouteCallback {
   const { controller, error, routeConfig } = config;
   const { key } = routeConfig;
 
-  const callback = async (request: Request, response: Response) => {
-    const resolver = controller[key].bind(controller);
+  return (request: Request, response: Response) => {
+    return wrap({
+      request,
+      response,
+      error,
+      callback: (request: Request, response: Response) => {
+        const resolver = controller[key].bind(controller);
 
-    const baseArgs = createRouteBaseArgs({ controller, key: key, request });
+        const baseArgs = createRouteBaseArgs({ controller, key, request });
 
-    const routeArgs = [...baseArgs, request, response];
+        const routeArgs = [...baseArgs, request, response];
 
-    return resolver(...routeArgs);
-  };
-
-  return async (request: Request, response: Response) => {
-    wrap({ request, response, callback, error });
+        return resolver(...routeArgs);
+      }
+    });
   };
 }
 
