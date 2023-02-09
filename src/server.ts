@@ -7,7 +7,7 @@ import { validationResult } from 'express-validator';
 import { args, controllers, middlewares, routes } from './stores';
 import {
   ControllerConfig,
-  HTTP_CODE,
+  HttpCode,
   MiddlewareType,
   OnMiddleware,
   RouteConfig
@@ -238,7 +238,7 @@ export function validator(): RequestHandler {
     if (errors.isEmpty()) {
       next();
     } else {
-      return res.status(HTTP_CODE.BAD_REQUEST).send(errors.array());
+      return res.status(HttpCode.BadRequest).send(errors.array());
     }
   };
 }

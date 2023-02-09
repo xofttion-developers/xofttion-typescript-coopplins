@@ -1,7 +1,7 @@
 {
   "name": "@xofttion/coopplins",
   "type": "commonjs",
-  "version": "4.4.7",
+  "version": "4.4.8",
   "author": "Daniel Andrés Castillo Pedroza",
   "license": "MIT",
   "main": "dist/index.js",
@@ -23,7 +23,7 @@
   },
   "peerDependencies": {
     "@xofttion/dependency-injection": "^4.4.3",
-    "@xofttion/utils": "^4.2.1"
+    "@xofttion/utils": "^4.2.4"
   },
   "devDependencies": {
     "@types/express": "^4.17.14",
