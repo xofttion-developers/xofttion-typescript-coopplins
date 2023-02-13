@@ -1,4 +1,5 @@
 import { args } from '../stores';
+import { ArgumentsType } from '../types';
 
 export function Body(key?: string): ParameterDecorator {
   return (target, functionKey, index) => {
@@ -6,7 +7,7 @@ export function Body(key?: string): ParameterDecorator {
       functionKey,
       index,
       key,
-      type: 'BODY'
+      type: ArgumentsType.Body
     });
   };
 }
@@ -17,7 +18,7 @@ export function Header(key: string): ParameterDecorator {
       functionKey,
       index,
       key,
-      type: 'HEADER'
+      type: ArgumentsType.Header
     });
   };
 }
@@ -28,7 +29,7 @@ export function PathParam(key: string): ParameterDecorator {
       functionKey,
       index,
       key,
-      type: 'PATH'
+      type: ArgumentsType.Path
     });
   };
 }
@@ -39,7 +40,7 @@ export function QueryParam(key: string): ParameterDecorator {
       functionKey,
       index,
       key,
-      type: 'QUERY'
+      type: ArgumentsType.Query
     });
   };
 }
