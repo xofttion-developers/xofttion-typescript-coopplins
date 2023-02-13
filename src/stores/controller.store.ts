@@ -1,3 +1,4 @@
+import { Optional } from '@xofttion/utils';
 import { ControllerConfig } from '../types';
 
 type ControllerMap = Map<Function, ControllerConfig>;
@@ -9,8 +10,8 @@ class ControllerStore {
     this.collection.set(controller, config);
   }
 
-  public get(controller: Function): ControllerConfig | undefined {
-    return this.collection.get(controller);
+  public get(controller: Function): Optional<ControllerConfig> {
+    return Optional.build(this.collection.get(controller));
   }
 }
 

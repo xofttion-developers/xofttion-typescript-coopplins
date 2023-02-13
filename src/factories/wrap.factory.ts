@@ -1,21 +1,29 @@
 import { Either } from '@xofttion/utils';
 import { Request, Response } from 'express';
-import { CoopplinsError } from './exceptions';
-import { HttpCode, Result } from './types';
+import { CoopplinsError } from '../exceptions';
+import { HttpCode, Result } from '../types';
 
 const message = 'An error occurred during the execution of the process';
 const errorCode = HttpCode.InternalServerError;
 
+type WrapCallback = (req: Request, res: Response) => Promise<any>;
 type WrapCall = (req: Request, res: Response) => Promise<Result | any> | any;
+type WrapError = (ex: unknown) => void;
 
 type WrapConfig = {
   callback: WrapCall;
-  error?: (ex: unknown) => void;
+  error?: WrapError;
   request: Request;
   response: Response;
 };
 
-export function wrap(config: WrapConfig): Promise<any> {
+export function createWrap(callback: WrapCall, error?: WrapError): WrapCallback {
+  return (request: Request, response: Response) => {
+    return wrap({ request, response, error, callback });
+  };
+}
+
+function wrap(config: WrapConfig): Promise<any> {
   const { request, response, callback } = config;
 
   const result = callback(request, response);

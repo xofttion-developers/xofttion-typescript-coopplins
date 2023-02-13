@@ -1,5 +1,5 @@
 import { routes } from '../stores';
-import { MiddlewareType, RouteHttp } from '../types';
+import { Http, MiddlewareType } from '../types';
 
 type HttpConfig = {
   middlewares: MiddlewareType[];
@@ -9,11 +9,7 @@ const defaultConfig: HttpConfig = {
   middlewares: []
 };
 
-function createRoute(
-  http: RouteHttp,
-  path: string,
-  config: HttpConfig
-): MethodDecorator {
+function createRoute(http: Http, path: string, config: HttpConfig): MethodDecorator {
   const { middlewares } = config;
 
   return (target, name) => {
@@ -27,25 +23,25 @@ function createRoute(
 }
 
 export function Post(path = '/', config?: Partial<HttpConfig>): MethodDecorator {
-  return createRoute('POST', path, { ...defaultConfig, ...config });
+  return createRoute(Http.Post, path, { ...defaultConfig, ...config });
 }
 
 export function Get(path = '/', config?: Partial<HttpConfig>): MethodDecorator {
-  return createRoute('GET', path, { ...defaultConfig, ...config });
+  return createRoute(Http.Get, path, { ...defaultConfig, ...config });
 }
 
 export function Put(path = '/', config?: Partial<HttpConfig>): MethodDecorator {
-  return createRoute('PUT', path, { ...defaultConfig, ...config });
+  return createRoute(Http.Put, path, { ...defaultConfig, ...config });
 }
 
 export function Delete(path = '/', config?: Partial<HttpConfig>): MethodDecorator {
-  return createRoute('DELETE', path, { ...defaultConfig, ...config });
+  return createRoute(Http.Delete, path, { ...defaultConfig, ...config });
 }
 
 export function Patch(path = '/', config?: Partial<HttpConfig>): MethodDecorator {
-  return createRoute('PATCH', path, { ...defaultConfig, ...config });
+  return createRoute(Http.Patch, path, { ...defaultConfig, ...config });
 }
 
 export function Options(path = '/', config?: Partial<HttpConfig>): MethodDecorator {
-  return createRoute('OPTIONS', path, { ...defaultConfig, ...config });
+  return createRoute(Http.Options, path, { ...defaultConfig, ...config });
 }
