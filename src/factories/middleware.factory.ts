@@ -6,9 +6,7 @@ import { MiddlewareRoute, MiddlewareType, OnMiddleware } from '../types';
 
 export function createMiddlewares(collection: MiddlewareType[]): MiddlewareRoute[] {
   return collection.reduce((middlewares, middleware) => {
-    createMiddleware(middleware).present((call) => {
-      middlewares.push(call);
-    });
+    createMiddleware(middleware).present((call) => middlewares.push(call));
 
     return middlewares;
   }, [] as MiddlewareRoute[]);
@@ -25,7 +23,7 @@ export function createMiddleware(ref: MiddlewareType): Optional<MiddlewareRoute>
     );
   }
 
-  const middleware = InjectionFactory(ref);
+  const middleware = InjectionFactory({ ref });
 
   return isMiddleware(middleware)
     ? Optional.of((req: Request, res: Response, next: NextFunction) => {

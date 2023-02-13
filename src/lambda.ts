@@ -18,7 +18,7 @@ type Config = {
 };
 
 type LambdaCallback = {
-  lambdaRef: Function;
+  ref: Function;
   error?: (ex: unknown) => void;
 };
 
@@ -33,7 +33,7 @@ export function registerLambdas(config: Config): void {
 
       const lambdaHttp = createHttpRoute(router, http);
       const lambdaMiddlerares = createMiddlewares(middlewares);
-      const lambdaCall = createCallback({ lambdaRef, error });
+      const lambdaCall = createCallback({ ref: lambdaRef, error });
 
       lambdaHttp(path, [...lambdaMiddlerares, lambdaCall]);
 
@@ -43,10 +43,13 @@ export function registerLambdas(config: Config): void {
 }
 
 function createCallback(config: LambdaCallback): RouteCallback {
-  const { lambdaRef, error } = config;
+  const { ref, error } = config;
 
   return createWrap((request: Request, response: Response) => {
-    const lambda = InjectionFactory<LambdaType>(lambdaRef);
+    const lambda = InjectionFactory<LambdaType>({
+      ref,
+      context: getContext(request)
+    });
 
     const resolver = lambda['execute'];
 
@@ -62,4 +65,10 @@ function createCallback(config: LambdaCallback): RouteCallback {
 
     return resolver(...[...args, request, response]);
   }, error);
+}
+
+function getContext(request: Request): Map<string, unknown> | undefined {
+  const context = (request as any)['context'];
+
+  return context instanceof Map<string, unknown> ? context : undefined;
 }

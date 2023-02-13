@@ -28,12 +28,12 @@ type ControllerCallback = {
 export function registerControllers(config: ControllersConfig): void {
   const { collection, error, server } = config;
 
-  for (const controllerRef of collection) {
-    controllers.get(controllerRef).present((controllerConfig) => {
-      const controller = InjectionFactory<ControllerType>(controllerRef);
+  for (const ref of collection) {
+    controllers.get(ref).present((controllerConfig) => {
+      const controller = InjectionFactory<ControllerType>({ ref });
       const router = createRouterController(controllerConfig);
 
-      const routesConfig = routes.get(controllerRef);
+      const routesConfig = routes.get(ref);
 
       for (const routeConfig of routesConfig) {
         const { http, middlewares, key, path } = routeConfig;
@@ -55,9 +55,7 @@ function createRouterController(config: ControllerConfig): Router {
   const { middlewares } = config;
 
   for (const middleware of middlewares) {
-    createMiddleware(middleware).present((call) => {
-      router.use(call);
-    });
+    createMiddleware(middleware).present((call) => router.use(call));
   }
 
   return router;

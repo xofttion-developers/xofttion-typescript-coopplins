@@ -22,7 +22,7 @@
     "reflect-metadata": "^0.1.13"
   },
   "peerDependencies": {
-    "@xofttion/dependency-injection": "^4.4.4",
+    "@xofttion/dependency-injection": "^4.5.0",
     "@xofttion/utils": "^4.2.4"
   },
   "devDependencies": {
