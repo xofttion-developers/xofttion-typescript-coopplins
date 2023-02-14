@@ -1,4 +1,4 @@
-import InjectionFactory from '@xofttion/dependency-injection';
+import InjectionFactory, { ScopeType } from '@xofttion/dependency-injection';
 import express, { Express, Request, Response } from 'express';
 import {
   createHttpArguments,
@@ -46,9 +46,9 @@ function createCallback(config: LambdaCallback): RouteCallback {
   const { ref, error } = config;
 
   return createWrap((request: Request, response: Response) => {
-    const context = getContext(request);
+    const scope = getContext(request);
 
-    const lambda = InjectionFactory<LambdaType>({ ref, context });
+    const lambda = InjectionFactory<LambdaType>({ ref, scope });
 
     if (typeof lambda['execute'] !== 'function') {
       return Promise.resolve();
@@ -66,8 +66,8 @@ function createCallback(config: LambdaCallback): RouteCallback {
   }, error);
 }
 
-function getContext(request: Request): Map<string, unknown> | undefined {
+function getContext(request: Request): ScopeType | undefined {
   const context = (request as any)['context'];
 
-  return context instanceof Map<string, unknown> ? context : undefined;
+  return context instanceof Map ? context : undefined;
 }
