@@ -22,6 +22,8 @@ type LambdaCallback = {
   error?: (ex: unknown) => void;
 };
 
+export const SCOPE_KEY = 'scope';
+
 export function registerLambdas(config: Config): void {
   const { collection, error, server } = config;
 
@@ -46,7 +48,7 @@ function createCallback(config: LambdaCallback): RouteCallback {
   const { ref, error } = config;
 
   return createWrap((request: Request, response: Response) => {
-    const scope = getContext(request);
+    const scope = getRequestScope(request);
 
     const lambda = InjectionFactory<LambdaType>({ ref, scope });
 
@@ -66,8 +68,8 @@ function createCallback(config: LambdaCallback): RouteCallback {
   }, error);
 }
 
-function getContext(request: Request): ScopeType | undefined {
-  const context = (request as any)['context'];
+function getRequestScope(request: Request): ScopeType | undefined {
+  const scope = (request as any)[SCOPE_KEY];
 
-  return context instanceof Map ? context : undefined;
+  return scope instanceof Map ? scope : undefined;
 }
