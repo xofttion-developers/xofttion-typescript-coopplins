@@ -1,4 +1,4 @@
-import InjectionFactory, { ScopeType } from '@xofttion/dependency-injection';
+import InjectionFactory, { ScopeStore } from '@xofttion/dependency-injection';
 import express, { Express, Request, Response } from 'express';
 import {
   createHttpArguments,
@@ -23,6 +23,7 @@ type LambdaCallback = {
 };
 
 export const SCOPE_KEY = 'scope';
+const key = 'execute';
 
 export function registerLambdas(config: Config): void {
   const { collection, error, server } = config;
@@ -48,28 +49,23 @@ function createCallback(config: LambdaCallback): RouteCallback {
   const { ref, error } = config;
 
   return createWrap((request: Request, response: Response) => {
-    const scope = getRequestScope(request);
+    const lambda = InjectionFactory<LambdaType>({
+      ref,
+      scope: getRequestScope(request)
+    });
 
-    const lambda = InjectionFactory<LambdaType>({ ref, scope });
-
-    if (typeof lambda['execute'] !== 'function') {
+    if (typeof lambda[key] !== 'function') {
       return Promise.resolve();
     }
 
-    const resolver = lambda['execute'].bind(lambda);
+    const resolver = lambda[key].bind(lambda);
 
-    const args = createHttpArguments({
-      object: lambda,
-      key: 'execute',
-      request
-    });
+    const args = createHttpArguments({ object: lambda, key, request });
 
     return resolver(...[...args, request, response]);
   }, error);
 }
 
-function getRequestScope(request: Request): ScopeType | undefined {
-  const scope = (request as any)[SCOPE_KEY];
-
-  return scope instanceof Map ? scope : undefined;
+function getRequestScope(request: any): ScopeStore | undefined {
+  return request[SCOPE_KEY] instanceof ScopeStore ? request[SCOPE_KEY] : undefined;
 }
