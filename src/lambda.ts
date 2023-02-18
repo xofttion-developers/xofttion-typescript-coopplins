@@ -31,7 +31,7 @@ export function registerLambdas(config: Config): void {
     lambdas.get(ref).present((lambdaConfig) => {
       const { http, middlewares, path } = lambdaConfig;
 
-      const router = express.Router();
+      const router = express.Router({ mergeParams: true });
 
       const lambdaHttp = createHttpRoute(router, http);
       const lambdaMiddlerares = createMiddlewares(middlewares);
