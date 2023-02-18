@@ -51,7 +51,7 @@ export function registerControllers(config: ControllersConfig): void {
 }
 
 function createRouterController(config: ControllerConfig): Router {
-  const router = express.Router();
+  const router = express.Router({ mergeParams: true });
   const { middlewares } = config;
 
   for (const middleware of middlewares) {

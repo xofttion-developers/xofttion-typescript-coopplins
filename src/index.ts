@@ -13,6 +13,7 @@ export {
   Middleware,
   Options,
   Patch,
+  PathParam,
   Post,
   Put,
   QueryParam
