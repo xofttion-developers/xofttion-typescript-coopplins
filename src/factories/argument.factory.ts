@@ -1,6 +1,7 @@
+import InjectionFactory from '@xofttion/dependency-injection';
 import { Request } from 'express';
 import { args } from '../stores';
-import { ArgumentsType } from '../types';
+import { ArgumentsType, getRequestScope } from '../types';
 
 type ArgumentConfig = {
   object: any;
@@ -15,7 +16,7 @@ export function createHttpArguments(config: ArgumentConfig): any[] {
 
   const values: any[] = [];
 
-  for (const { key, type } of argsConfig) {
+  for (const { key, type, target } of argsConfig) {
     switch (type) {
       case ArgumentsType.Body:
         values.push(key ? request.body[key] : request.body);
@@ -28,6 +29,16 @@ export function createHttpArguments(config: ArgumentConfig): any[] {
         break;
       case ArgumentsType.Query:
         values.push(key ? request.query[key] : undefined);
+        break;
+      case ArgumentsType.Interactor:
+        if (target) {
+          const scope = getRequestScope(request);
+          const interactor = InjectionFactory({ ref: target, scope });
+
+          values.push(interactor);
+        } else {
+          values.push(undefined);
+        }
         break;
     }
   }
