@@ -1,3 +1,4 @@
+import { InjectableRef } from '@xofttion/dependency-injection/dist/types';
 import { args } from '../stores';
 import { ArgumentsType } from '../types';
 
@@ -41,6 +42,17 @@ export function QueryParam(key: string): ParameterDecorator {
       index,
       key,
       type: ArgumentsType.Query
+    });
+  };
+}
+
+export function Interactor(interactor: InjectableRef): ParameterDecorator {
+  return (target, functionKey, index) => {
+    args.add(target.constructor, {
+      functionKey,
+      index,
+      target: interactor,
+      type: ArgumentsType.Interactor
     });
   };
 }

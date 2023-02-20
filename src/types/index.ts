@@ -4,3 +4,4 @@ export * from './http.type';
 export * from './lambda.type';
 export * from './middleware.type';
 export * from './route.type';
+export * from './scope.type';
