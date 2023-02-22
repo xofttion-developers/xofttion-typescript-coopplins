@@ -5,7 +5,7 @@ export enum ArgumentsType {
   Header = 2,
   Path = 3,
   Query = 4,
-  Interactor = 9
+  Object = 9
 }
 
 export type ArgumentsConfig = {

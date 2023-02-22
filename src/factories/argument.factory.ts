@@ -30,7 +30,7 @@ export function createHttpArguments(config: ArgumentConfig): any[] {
       case ArgumentsType.Query:
         values.push(key ? request.query[key] : undefined);
         break;
-      case ArgumentsType.Interactor:
+      case ArgumentsType.Object:
         if (target) {
           const scope = getRequestScope(request);
           const interactor = InjectionFactory({ ref: target, scope });
