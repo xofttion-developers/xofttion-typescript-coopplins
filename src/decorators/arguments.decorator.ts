@@ -46,13 +46,13 @@ export function QueryParam(key: string): ParameterDecorator {
   };
 }
 
-export function Interactor(interactor: InjectableRef): ParameterDecorator {
+export function Object(object: InjectableRef): ParameterDecorator {
   return (target, functionKey, index) => {
     args.add(target.constructor, {
       functionKey,
       index,
-      target: interactor,
-      type: ArgumentsType.Interactor
+      target: object,
+      type: ArgumentsType.Object
     });
   };
 }
