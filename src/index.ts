@@ -11,7 +11,7 @@ export {
   LambdaPost,
   LambdaPut,
   Middleware,
-  Object,
+  Provide,
   Options,
   Patch,
   PathParam,
