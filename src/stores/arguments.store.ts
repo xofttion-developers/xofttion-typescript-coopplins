@@ -7,41 +7,41 @@ class ArgumentStore {
   private collection: ControllerMap = new Map();
 
   public add(controller: Function, config: ArgumentsConfig): void {
-    const { functionKey, index } = config;
+    const { token, index } = config;
 
-    const argsCollection = this.get(controller, functionKey);
+    const argsCollection = this.get(controller, token);
 
     argsCollection[index] = config;
   }
 
-  public get(controller: Function, functionKey: string | symbol): ArgumentsConfig[] {
+  public get(controller: Function, token: string | symbol): ArgumentsConfig[] {
     const functionMap = this.getFunctionMap(controller);
 
-    const currentArgs = functionMap.get(functionKey);
+    const current = functionMap.get(token);
 
-    if (currentArgs) {
-      return currentArgs;
+    if (current) {
+      return current;
     }
 
-    const argsCollection: ArgumentsConfig[] = [];
+    const collection: ArgumentsConfig[] = [];
 
-    functionMap.set(functionKey, argsCollection);
+    functionMap.set(token, collection);
 
-    return argsCollection;
+    return collection;
   }
 
   private getFunctionMap(controller: Function): FunctionMap {
-    const currentFunction = this.collection.get(controller);
+    const current = this.collection.get(controller);
 
-    if (currentFunction) {
-      return currentFunction;
+    if (current) {
+      return current;
     }
 
-    const functionMap = new Map<string | symbol, ArgumentsConfig[]>();
+    const map = new Map<string | symbol, ArgumentsConfig[]>();
 
-    this.collection.set(controller, functionMap);
+    this.collection.set(controller, map);
 
-    return functionMap;
+    return map;
   }
 }
 

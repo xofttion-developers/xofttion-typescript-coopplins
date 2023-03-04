@@ -3,5 +3,5 @@ export * from './controller.type';
 export * from './http.type';
 export * from './lambda.type';
 export * from './middleware.type';
+export * from './namespace.type';
 export * from './route.type';
-export * from './scope.type';

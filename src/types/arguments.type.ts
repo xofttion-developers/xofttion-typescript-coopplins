@@ -1,4 +1,4 @@
-import { InjectableRef } from '@xofttion/dependency-injection/dist/types';
+import { InjectableToken } from '@xofttion/dependency-injection/dist/types';
 
 export enum ArgumentsType {
   Body = 1,
@@ -9,9 +9,9 @@ export enum ArgumentsType {
 }
 
 export type ArgumentsConfig = {
-  functionKey: string | symbol;
+  token: string | symbol;
   index: number;
   key?: string;
   type: ArgumentsType;
-  target?: InjectableRef;
+  target?: InjectableToken;
 };

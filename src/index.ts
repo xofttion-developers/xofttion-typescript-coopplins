@@ -22,4 +22,4 @@ export {
 export * from './exceptions';
 export * from './results';
 export { coopplins, environment, validator } from './server';
-export { Http, HttpCode, OnMiddleware, Result, SCOPE_KEY } from './types';
+export { Http, HttpCode, OnMiddleware, Result, NAMESPACE_KEY as SCOPE_KEY } from './types';
