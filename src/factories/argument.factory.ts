@@ -1,7 +1,7 @@
-import InjectionFactory from '@xofttion/dependency-injection';
+import warehouse from '@xofttion/dependency-injection';
 import { Request } from 'express';
 import { args } from '../stores';
-import { ArgumentsType, getRequestScope } from '../types';
+import { ArgumentsType, getNamespaceRequest } from '../types';
 
 type ArgumentConfig = {
   object: any;
@@ -32,8 +32,10 @@ export function createHttpArguments(config: ArgumentConfig): any[] {
         break;
       case ArgumentsType.Provide:
         if (target) {
-          const scope = getRequestScope(request);
-          const interactor = InjectionFactory({ ref: target, scope });
+          const interactor = warehouse({
+            token: target,
+            namespace: getNamespaceRequest(request)
+          });
 
           values.push(interactor);
         } else {

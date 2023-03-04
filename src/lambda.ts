@@ -1,4 +1,4 @@
-import InjectionFactory from '@xofttion/dependency-injection';
+import warehouse from '@xofttion/dependency-injection';
 import express, { Express, Request, Response } from 'express';
 import {
   createHttpArguments,
@@ -7,7 +7,7 @@ import {
   createWrap
 } from './factories';
 import { lambdas } from './stores';
-import { getRequestScope } from './types';
+import { getNamespaceRequest } from './types';
 
 type LambdaType = { [key: string]: Function };
 type RouteCallback = (request: Request, response: Response) => Promise<any>;
@@ -19,26 +19,24 @@ type Config = {
 };
 
 type LambdaCallback = {
-  ref: Function;
+  token: Function;
   error?: (ex: unknown) => void;
 };
 
 const key = 'execute';
 
-export function registerLambdas(config: Config): void {
-  const { collection, error, server } = config;
-
+export function registerLambdas({ collection, error, server }: Config): void {
   for (const ref of collection) {
-    lambdas.get(ref).present((lambdaConfig) => {
-      const { http, middlewares, path } = lambdaConfig;
+    lambdas.get(ref).present((config) => {
+      const { http, middlewares, path } = config;
 
       const router = express.Router({ mergeParams: true });
 
-      const lambdaHttp = createHttpRoute(router, http);
-      const lambdaMiddlerares = createMiddlewares(middlewares);
-      const lambdaCall = createCallback({ ref, error });
+      const httpLambda = createHttpRoute(router, http);
+      const middleraresLambda = createMiddlewares(middlewares);
+      const callLambda = createCallback({ token: ref, error });
 
-      lambdaHttp('/', [...lambdaMiddlerares, lambdaCall]);
+      httpLambda('/', [...middleraresLambda, callLambda]);
 
       server.use(path, router);
     });
@@ -46,20 +44,19 @@ export function registerLambdas(config: Config): void {
 }
 
 function createCallback(config: LambdaCallback): RouteCallback {
-  const { ref, error } = config;
+  const { token, error } = config;
 
   return createWrap((request: Request, response: Response) => {
-    const scope = getRequestScope(request);
+    const namespace = getNamespaceRequest(request);
+    const object = warehouse<LambdaType>({ token, namespace });
 
-    const lambda = InjectionFactory<LambdaType>({ ref, scope });
-
-    if (typeof lambda[key] !== 'function') {
+    if (typeof object[key] !== 'function') {
       return Promise.resolve();
     }
 
-    const resolver = lambda[key].bind(lambda);
+    const resolver = object[key].bind(object);
 
-    const args = createHttpArguments({ object: lambda, key, request });
+    const args = createHttpArguments({ object, key, request });
 
     return resolver(...[...args, request, response]);
   }, error);

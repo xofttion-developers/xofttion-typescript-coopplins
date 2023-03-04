@@ -1,4 +1,4 @@
-import InjectionFactory from '@xofttion/dependency-injection';
+import warehouse from '@xofttion/dependency-injection';
 import express, { Express, Request, Response, Router } from 'express';
 import {
   createHttpArguments,
@@ -8,12 +8,12 @@ import {
   createWrap
 } from './factories';
 import { controllers, routes } from './stores';
-import { ControllerConfig } from './types';
+import { MiddlewareType } from './types';
 
 type ControllerType = { [key: string | symbol]: Function };
 type RouteCallback = (request: Request, response: Response) => Promise<any>;
 
-type ControllersConfig = {
+type Config = {
   collection: Function[];
   error?: (ex: unknown) => void;
   server: Express;
@@ -25,34 +25,31 @@ type ControllerCallback = {
   key: string | symbol;
 };
 
-export function registerControllers(config: ControllersConfig): void {
-  const { collection, error, server } = config;
+export function registerControllers({ collection, error, server }: Config): void {
+  for (const token of collection) {
+    controllers.get(token).present(({ basePath, middlewares }) => {
+      const controller = warehouse<ControllerType>({ token });
+      const router = createRouterController(middlewares);
 
-  for (const ref of collection) {
-    controllers.get(ref).present((controllerConfig) => {
-      const controller = InjectionFactory<ControllerType>({ ref });
-      const router = createRouterController(controllerConfig);
+      const routesConfig = routes.get(token);
 
-      const routesConfig = routes.get(ref);
+      for (const config of routesConfig) {
+        const { http, middlewares, key, path } = config;
 
-      for (const routeConfig of routesConfig) {
-        const { http, middlewares, key, path } = routeConfig;
+        const middlewaresRoute = createMiddlewares(middlewares);
+        const httpRoute = createHttpRoute(router, http);
+        const callRoute = createCallback({ controller, key, error });
 
-        const routeMiddlewares = createMiddlewares(middlewares);
-        const routeHttp = createHttpRoute(router, http);
-        const routeCall = createCallback({ controller, key, error });
-
-        routeHttp(path, [...routeMiddlewares, routeCall]);
+        httpRoute(path, [...middlewaresRoute, callRoute]);
       }
 
-      server.use(controllerConfig.basePath, router);
+      server.use(basePath, router);
     });
   }
 }
 
-function createRouterController(config: ControllerConfig): Router {
+function createRouterController(middlewares: MiddlewareType[]): Router {
   const router = express.Router({ mergeParams: true });
-  const { middlewares } = config;
 
   for (const middleware of middlewares) {
     createMiddleware(middleware).present((call) => router.use(call));

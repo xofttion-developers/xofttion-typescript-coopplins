@@ -1,11 +1,11 @@
-import { InjectableRef } from '@xofttion/dependency-injection/dist/types';
+import { InjectableToken } from '@xofttion/dependency-injection/dist/types';
 import { args } from '../stores';
 import { ArgumentsType } from '../types';
 
 export function Body(key?: string): ParameterDecorator {
-  return (target, functionKey, index) => {
+  return (target, token, index) => {
     args.add(target.constructor, {
-      functionKey,
+      token,
       index,
       key,
       type: ArgumentsType.Body
@@ -14,9 +14,9 @@ export function Body(key?: string): ParameterDecorator {
 }
 
 export function Header(key: string): ParameterDecorator {
-  return (target, functionKey, index) => {
+  return (target, token, index) => {
     args.add(target.constructor, {
-      functionKey,
+      token,
       index,
       key,
       type: ArgumentsType.Header
@@ -25,9 +25,9 @@ export function Header(key: string): ParameterDecorator {
 }
 
 export function PathParam(key: string): ParameterDecorator {
-  return (target, functionKey, index) => {
+  return (target, token, index) => {
     args.add(target.constructor, {
-      functionKey,
+      token,
       index,
       key,
       type: ArgumentsType.Path
@@ -36,9 +36,9 @@ export function PathParam(key: string): ParameterDecorator {
 }
 
 export function QueryParam(key: string): ParameterDecorator {
-  return (target, functionKey, index) => {
+  return (target, token, index) => {
     args.add(target.constructor, {
-      functionKey,
+      token,
       index,
       key,
       type: ArgumentsType.Query
@@ -46,12 +46,12 @@ export function QueryParam(key: string): ParameterDecorator {
   };
 }
 
-export function Provide(provide: InjectableRef): ParameterDecorator {
-  return (target, functionKey, index) => {
+export function Provide(provide: InjectableToken): ParameterDecorator {
+  return (target, token, index) => {
     args.add(target.constructor, {
-      functionKey,
-      index,
       target: provide,
+      token,
+      index,
       type: ArgumentsType.Provide
     });
   };

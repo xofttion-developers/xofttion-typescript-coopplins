@@ -1,4 +1,4 @@
-import { createInjectable } from '@xofttion/dependency-injection';
+import { createInjectable } from '@xofttion/dependency-injection/dist/factories';
 import { lambdas } from '../stores';
 import { Http, LambdaConfig, MiddlewareType } from '../types';
 
