@@ -1,8 +1,8 @@
 import { Http } from './http.type';
-import { MiddlewareType } from './middleware.type';
+import { MiddlewareToken } from './middleware.type';
 
 export type LambdaConfig = {
   http: Http;
-  middlewares: MiddlewareType[];
+  middlewares: MiddlewareToken[];
   path: string;
 };

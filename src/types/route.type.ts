@@ -1,9 +1,9 @@
 import { Http } from './http.type';
-import { MiddlewareType } from './middleware.type';
+import { MiddlewareToken } from './middleware.type';
 
 export type RouteConfig = {
   key: string | symbol;
   http: Http;
-  middlewares: MiddlewareType[];
+  middlewares: MiddlewareToken[];
   path: string;
 };

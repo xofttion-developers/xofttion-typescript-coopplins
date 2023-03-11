@@ -1,9 +1,9 @@
 import { Either } from '@xofttion/utils';
-import { MiddlewareType } from './middleware.type';
+import { MiddlewareToken } from './middleware.type';
 
 export type ControllerConfig = {
   basePath: string;
-  middlewares: MiddlewareType[];
+  middlewares: MiddlewareToken[];
 };
 
 export type ResultInvalid = {

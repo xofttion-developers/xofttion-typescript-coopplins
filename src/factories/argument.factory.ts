@@ -1,7 +1,7 @@
 import warehouse from '@xofttion/dependency-injection';
 import { Request } from 'express';
 import { args } from '../stores';
-import { ArgumentsType, getNamespaceRequest } from '../types';
+import { ArgumentsType, getWorkspaceRequest } from '../types';
 
 type ArgumentConfig = {
   object: any;
@@ -34,7 +34,7 @@ export function createHttpArguments(config: ArgumentConfig): any[] {
         if (target) {
           const interactor = warehouse({
             token: target,
-            namespace: getNamespaceRequest(request)
+            workspace: getWorkspaceRequest(request)
           });
 
           values.push(interactor);

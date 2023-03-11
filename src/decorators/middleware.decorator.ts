@@ -1,4 +1,4 @@
-import { createInjectable } from '@xofttion/dependency-injection/dist/factories';
+import { createInjectable } from '@xofttion/dependency-injection';
 import { middlewares } from '../stores';
 
 export function Middleware(): ClassDecorator {
