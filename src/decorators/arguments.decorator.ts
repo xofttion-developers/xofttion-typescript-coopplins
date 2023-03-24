@@ -1,58 +1,74 @@
-import { InjectableToken } from '@xofttion/dependency-injection/dist/types';
+import { InjectableToken } from '@xofttion/dependency-injection';
 import { args } from '../stores';
-import { ArgumentsType } from '../types';
+import { ArgumentsDataType as DataType, ArgumentsType } from '../types';
 
-export function Body(key?: string): ParameterDecorator {
+type Decorator = ParameterDecorator;
+
+type Config = {
+  type: ArgumentsType;
+  key?: string;
+  dataType?: DataType;
+};
+
+function createParameter({ type, key, dataType }: Config): Decorator {
   return (target, token, index) => {
     args.add(target.constructor, {
-      token,
+      dataType: dataType || 'string',
       index,
       key,
-      type: ArgumentsType.Body
+      token,
+      type
     });
   };
 }
 
-export function Header(key: string): ParameterDecorator {
+export function Provide(provide: InjectableToken): Decorator {
   return (target, token, index) => {
     args.add(target.constructor, {
-      token,
       index,
-      key,
-      type: ArgumentsType.Header
-    });
-  };
-}
-
-export function PathParam(key: string): ParameterDecorator {
-  return (target, token, index) => {
-    args.add(target.constructor, {
-      token,
-      index,
-      key,
-      type: ArgumentsType.Path
-    });
-  };
-}
-
-export function QueryParam(key: string): ParameterDecorator {
-  return (target, token, index) => {
-    args.add(target.constructor, {
-      token,
-      index,
-      key,
-      type: ArgumentsType.Query
-    });
-  };
-}
-
-export function Provide(provide: InjectableToken): ParameterDecorator {
-  return (target, token, index) => {
-    args.add(target.constructor, {
       target: provide,
       token,
-      index,
       type: ArgumentsType.Provide
     });
   };
+}
+
+export function Body(key?: string): Decorator {
+  return createParameter({ type: ArgumentsType.Body, key });
+}
+
+export function Header(key: string, dataType?: DataType): Decorator {
+  return createParameter({ type: ArgumentsType.Header, dataType, key });
+}
+
+export function HeaderBool(key: string): Decorator {
+  return createParameter({ type: ArgumentsType.Header, dataType: 'boolean', key });
+}
+
+export function HeaderNumber(key: string): Decorator {
+  return createParameter({ type: ArgumentsType.Header, dataType: 'number', key });
+}
+
+export function PathParam(key: string, dataType?: DataType): Decorator {
+  return createParameter({ type: ArgumentsType.Path, dataType, key });
+}
+
+export function PathParamBool(key: string): Decorator {
+  return createParameter({ type: ArgumentsType.Path, dataType: 'boolean', key });
+}
+
+export function PathParamNumber(key: string): Decorator {
+  return createParameter({ type: ArgumentsType.Path, dataType: 'number', key });
+}
+
+export function QueryParam(key: string, dataType?: DataType): Decorator {
+  return createParameter({ type: ArgumentsType.Query, dataType, key });
+}
+
+export function QueryParamBool(key: string): Decorator {
+  return createParameter({ type: ArgumentsType.Query, dataType: 'boolean', key });
+}
+
+export function QueryParamNumber(key: string): Decorator {
+  return createParameter({ type: ArgumentsType.Query, dataType: 'number', key });
 }

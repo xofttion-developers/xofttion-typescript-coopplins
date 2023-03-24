@@ -8,7 +8,7 @@ import {
   createWrap
 } from './factories';
 import { controllers, routes } from './stores';
-import { MiddlewareType } from './types';
+import { MiddlewareToken } from './types';
 
 type ControllerType = { [key: string | symbol]: Function };
 type RouteCallback = (request: Request, response: Response) => Promise<any>;
@@ -48,7 +48,7 @@ export function registerControllers({ collection, error, server }: Config): void
   }
 }
 
-function createRouterController(middlewares: MiddlewareType[]): Router {
+function createRouterController(middlewares: MiddlewareToken[]): Router {
   const router = express.Router({ mergeParams: true });
 
   for (const middleware of middlewares) {

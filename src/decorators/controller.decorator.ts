@@ -1,10 +1,10 @@
-import { createInjectable } from '@xofttion/dependency-injection/dist/factories';
+import { createInjectable } from '@xofttion/dependency-injection';
 import { controllers } from '../stores';
-import { MiddlewareType } from '../types';
+import { MiddlewareToken } from '../types';
 
 export function Controller(
   basePath = '/',
-  middlewares: MiddlewareType[] = []
+  middlewares: MiddlewareToken[] = []
 ): ClassDecorator {
   return (target) => {
     controllers.add(target, { basePath, middlewares });

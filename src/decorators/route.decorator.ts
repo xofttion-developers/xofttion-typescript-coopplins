@@ -1,8 +1,8 @@
 import { routes } from '../stores';
-import { Http, MiddlewareType } from '../types';
+import { Http, MiddlewareToken } from '../types';
 
 type HttpConfig = {
-  middlewares: MiddlewareType[];
+  middlewares: MiddlewareToken[];
 };
 
 const defaultConfig: HttpConfig = {

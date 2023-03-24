@@ -1,7 +1,8 @@
 import warehouse from '@xofttion/dependency-injection';
+import { parseBoolean } from '@xofttion/utils';
 import { Request } from 'express';
 import { args } from '../stores';
-import { ArgumentsType, getNamespaceRequest } from '../types';
+import { ArgumentsDataType, ArgumentsType, getWorkspaceRequest } from '../types';
 
 type ArgumentConfig = {
   object: any;
@@ -10,31 +11,37 @@ type ArgumentConfig = {
 };
 
 export function createHttpArguments(config: ArgumentConfig): any[] {
-  const { object, key, request } = config;
+  const { key, object, request } = config;
 
   const argsConfig = args.get(object.constructor, key);
 
   const values: any[] = [];
 
-  for (const { key, type, target } of argsConfig) {
+  for (const { dataType, key, type, target } of argsConfig) {
     switch (type) {
       case ArgumentsType.Body:
         values.push(key ? request.body[key] : request.body);
         break;
       case ArgumentsType.Header:
-        values.push(key ? request.headers[key] : undefined);
+        values.push(
+          key ? getArgumentValue(request.headers[key], dataType) : undefined
+        );
         break;
       case ArgumentsType.Path:
-        values.push(key ? request.params[key] : undefined);
+        values.push(
+          key ? getArgumentValue(request.params[key], dataType) : undefined
+        );
         break;
       case ArgumentsType.Query:
-        values.push(key ? request.query[key] : undefined);
+        values.push(
+          key ? getArgumentValue(request.query[key], dataType) : undefined
+        );
         break;
       case ArgumentsType.Provide:
         if (target) {
           const interactor = warehouse({
             token: target,
-            namespace: getNamespaceRequest(request)
+            workspace: getWorkspaceRequest(request)
           });
 
           values.push(interactor);
@@ -46,4 +53,19 @@ export function createHttpArguments(config: ArgumentConfig): any[] {
   }
 
   return values;
+}
+
+function getArgumentValue(value: any, dataType?: ArgumentsDataType): any {
+  if (!value || !dataType) {
+    return value;
+  }
+
+  switch (dataType) {
+    case 'number':
+      return new Number(value);
+    case 'boolean':
+      return parseBoolean(value);
+    default:
+      return value;
+  }
 }

@@ -2,9 +2,9 @@ import warehouse from '@xofttion/dependency-injection';
 import { Optional } from '@xofttion/utils';
 import { NextFunction, Request, Response } from 'express';
 import { middlewares } from '../stores';
-import { MiddlewareRoute, MiddlewareType, OnMiddleware } from '../types';
+import { MiddlewareRoute, MiddlewareToken, OnMiddleware } from '../types';
 
-export function createMiddlewares(collection: MiddlewareType[]): MiddlewareRoute[] {
+export function createMiddlewares(collection: MiddlewareToken[]): MiddlewareRoute[] {
   return collection.reduce((middlewares, middleware) => {
     createMiddleware(middleware).present((call) => middlewares.push(call));
 
@@ -12,18 +12,18 @@ export function createMiddlewares(collection: MiddlewareType[]): MiddlewareRoute
   }, [] as MiddlewareRoute[]);
 }
 
-export function createMiddleware(ref: MiddlewareType): Optional<MiddlewareRoute> {
-  if (typeof ref !== 'function') {
-    return Optional.of(ref);
+export function createMiddleware(token: MiddlewareToken): Optional<MiddlewareRoute> {
+  if (typeof token !== 'function') {
+    return Optional.of(token);
   }
 
-  if (!middlewares.has(ref)) {
+  if (!middlewares.has(token)) {
     return Optional.of((req: Request, res: Response, next: NextFunction) =>
-      ref(req, res, next)
+      token(req, res, next)
     );
   }
 
-  const middleware = warehouse({ token: ref });
+  const middleware = warehouse({ token });
 
   return isMiddleware(middleware)
     ? Optional.of((req: Request, res: Response, next: NextFunction) => {

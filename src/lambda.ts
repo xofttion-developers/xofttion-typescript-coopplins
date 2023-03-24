@@ -7,9 +7,8 @@ import {
   createWrap
 } from './factories';
 import { lambdas } from './stores';
-import { getNamespaceRequest } from './types';
+import { getWorkspaceRequest } from './types';
 
-type LambdaType = { [key: string]: Function };
 type RouteCallback = (request: Request, response: Response) => Promise<any>;
 
 type Config = {
@@ -47,10 +46,10 @@ function createCallback(config: LambdaCallback): RouteCallback {
   const { token, error } = config;
 
   return createWrap((request: Request, response: Response) => {
-    const namespace = getNamespaceRequest(request);
-    const object = warehouse<LambdaType>({ token, namespace });
+    const workspace = getWorkspaceRequest(request);
+    const object = warehouse<any>({ token, workspace });
 
-    if (typeof object[key] !== 'function') {
+    if (typeof object.execute !== 'function') {
       return Promise.resolve();
     }
 
