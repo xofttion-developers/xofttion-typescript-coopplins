@@ -1,4 +1,6 @@
-import { InjectableToken } from '@xofttion/dependency-injection/dist/types';
+import { InjectableToken } from '@xofttion/dependency-injection';
+
+export type ArgumentsDataType = 'string' | 'number' | 'boolean' | 'object';
 
 export enum ArgumentsType {
   Body = 1,
@@ -9,9 +11,10 @@ export enum ArgumentsType {
 }
 
 export type ArgumentsConfig = {
-  token: string | symbol;
   index: number;
-  key?: string;
+  token: string | symbol;
   type: ArgumentsType;
+  dataType?: ArgumentsDataType;
+  key?: string;
   target?: InjectableToken;
 };

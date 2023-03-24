@@ -1,7 +1,7 @@
 import { ArgumentsConfig } from '../types';
 
-type FunctionMap = Map<string | symbol, ArgumentsConfig[]>;
-type ControllerMap = Map<Function, FunctionMap>;
+type ArgumentMap = Map<string | symbol, ArgumentsConfig[]>;
+type ControllerMap = Map<Function, ArgumentMap>;
 
 class ArgumentStore {
   private collection: ControllerMap = new Map();
@@ -15,7 +15,7 @@ class ArgumentStore {
   }
 
   public get(controller: Function, token: string | symbol): ArgumentsConfig[] {
-    const functionMap = this.getFunctionMap(controller);
+    const functionMap = this.getArgumentMap(controller);
 
     const current = functionMap.get(token);
 
@@ -30,7 +30,7 @@ class ArgumentStore {
     return collection;
   }
 
-  private getFunctionMap(controller: Function): FunctionMap {
+  private getArgumentMap(controller: Function): ArgumentMap {
     const current = this.collection.get(controller);
 
     if (current) {
