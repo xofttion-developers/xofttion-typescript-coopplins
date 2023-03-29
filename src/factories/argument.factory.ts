@@ -17,7 +17,7 @@ export function createHttpArguments(config: ArgumentConfig): any[] {
 
   const values: any[] = [];
 
-  for (const { dataType, key, type, target } of argsConfig) {
+  for (const { dataType, key, type, target: token } of argsConfig) {
     switch (type) {
       case ArgumentsType.Body:
         values.push(key ? request.body[key] : request.body);
@@ -37,17 +37,10 @@ export function createHttpArguments(config: ArgumentConfig): any[] {
           key ? getArgumentValue(request.query[key], dataType) : undefined
         );
         break;
-      case ArgumentsType.Provide:
-        if (target) {
-          const interactor = warehouse({
-            token: target,
-            workspace: getWorkspaceRequest(request)
-          });
+      case ArgumentsType.Inject:
+        const workspace = getWorkspaceRequest(request);
 
-          values.push(interactor);
-        } else {
-          values.push(undefined);
-        }
+        values.push(token ? warehouse({ token, workspace }) : undefined);
         break;
     }
   }
