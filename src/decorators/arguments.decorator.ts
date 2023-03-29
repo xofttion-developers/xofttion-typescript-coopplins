@@ -22,13 +22,13 @@ function createParameter({ type, key, dataType }: Config): Decorator {
   };
 }
 
-export function Provide(provide: InjectableToken): Decorator {
+export function Inject(inject: InjectableToken): Decorator {
   return (target, token, index) => {
     args.add(target.constructor, {
       index,
-      target: provide,
+      target: inject,
       token,
-      type: ArgumentsType.Provide
+      type: ArgumentsType.Inject
     });
   };
 }
