@@ -7,7 +7,7 @@ import {
   createWrap
 } from './factories';
 import { lambdas } from './stores';
-import { getWorkspaceRequest } from './types';
+import { fetchWorkSpace } from './types';
 
 type RouteCallback = (request: Request, response: Response) => Promise<any>;
 
@@ -46,7 +46,7 @@ function createCallback(config: LambdaCallback): RouteCallback {
   const { token, error } = config;
 
   return createWrap((request: Request, response: Response) => {
-    const workspace = getWorkspaceRequest(request);
+    const workspace = fetchWorkSpace(request);
     const object = warehouse<any>({ token, workspace });
 
     if (typeof object.execute !== 'function') {

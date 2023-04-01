@@ -1,9 +1,11 @@
-import { WorkspaceStore } from '@xofttion/dependency-injection';
+import { WorkSpace } from '@xofttion/dependency-injection';
 
-export const WORKSPACE_KEY = 'workspace';
-
-export function getWorkspaceRequest(request: any): WorkspaceStore | undefined {
-  return request[WORKSPACE_KEY] instanceof WorkspaceStore
-    ? request[WORKSPACE_KEY]
+export function fetchWorkSpace(request: any): WorkSpace | undefined {
+  return request['workspace'] instanceof WorkSpace
+    ? request['workspace']
     : undefined;
+}
+
+export function putWorkSpace(request: any, workspace: WorkSpace): void {
+  request['workspace'] = workspace;
 }

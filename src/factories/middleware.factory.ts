@@ -1,4 +1,4 @@
-import warehouse from '@xofttion/dependency-injection';
+import factoryInjectable from '@xofttion/dependency-injection';
 import { Optional } from '@xofttion/utils';
 import { NextFunction, Request, Response } from 'express';
 import { middlewares } from '../stores';
@@ -23,7 +23,7 @@ export function createMiddleware(token: MiddlewareToken): Optional<MiddlewareRou
     );
   }
 
-  const middleware = warehouse({ token });
+  const middleware = factoryInjectable({ token });
 
   return isMiddleware(middleware)
     ? Optional.of((req: Request, res: Response, next: NextFunction) => {
