@@ -1,4 +1,4 @@
-import warehouse from '@xofttion/dependency-injection';
+import factoryInjectable from '@xofttion/dependency-injection';
 import express, { Express, Request, Response } from 'express';
 import {
   createHttpArguments,
@@ -7,7 +7,7 @@ import {
   createWrap
 } from './factories';
 import { lambdas } from './stores';
-import { fetchWorkSpace } from './types';
+import { getContext } from './types';
 
 type RouteCallback = (request: Request, response: Response) => Promise<any>;
 
@@ -46,8 +46,7 @@ function createCallback(config: LambdaCallback): RouteCallback {
   const { token, error } = config;
 
   return createWrap((request: Request, response: Response) => {
-    const workspace = fetchWorkSpace(request);
-    const object = warehouse<any>({ token, workspace });
+    const object = factoryInjectable<any>({ token, context: getContext(request) });
 
     if (typeof object.execute !== 'function') {
       return Promise.resolve();
