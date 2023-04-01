@@ -2,7 +2,7 @@ import factoryInjectable from '@xofttion/dependency-injection';
 import { parseBoolean } from '@xofttion/utils';
 import { Request } from 'express';
 import { args } from '../stores';
-import { ArgumentsDataType, ArgumentsType, fetchWorkSpace } from '../types';
+import { ArgumentsDataType, ArgumentsType, getContext } from '../types';
 
 type ArgumentConfig = {
   object: any;
@@ -40,7 +40,7 @@ export function createHttpArguments(config: ArgumentConfig): any[] {
       case ArgumentsType.Inject:
         values.push(
           token
-            ? factoryInjectable({ token, workspace: fetchWorkSpace(request) })
+            ? factoryInjectable({ token, context: getContext(request) })
             : undefined
         );
         break;
