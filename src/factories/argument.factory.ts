@@ -1,8 +1,8 @@
-import warehouse from '@xofttion/dependency-injection';
+import factoryInjectable from '@xofttion/dependency-injection';
 import { parseBoolean } from '@xofttion/utils';
 import { Request } from 'express';
 import { args } from '../stores';
-import { ArgumentsDataType, ArgumentsType, getWorkspaceRequest } from '../types';
+import { ArgumentsDataType, ArgumentsType, fetchWorkSpace } from '../types';
 
 type ArgumentConfig = {
   object: any;
@@ -38,9 +38,11 @@ export function createHttpArguments(config: ArgumentConfig): any[] {
         );
         break;
       case ArgumentsType.Inject:
-        const workspace = getWorkspaceRequest(request);
-
-        values.push(token ? warehouse({ token, workspace }) : undefined);
+        values.push(
+          token
+            ? factoryInjectable({ token, workspace: fetchWorkSpace(request) })
+            : undefined
+        );
         break;
     }
   }
