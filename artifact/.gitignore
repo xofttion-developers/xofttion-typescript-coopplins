@@ -1,0 +1,7 @@
+*.d.ts
+*.js
+*.js.map
+decorators
+factories
+stores
+types
