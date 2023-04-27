@@ -12,24 +12,28 @@ type Config = {
 
 function createParameter({ type, key, dataType }: Config): Decorator {
   return (target, token, index) => {
-    args.add(target.constructor, {
-      dataType: dataType || 'string',
-      index,
-      key,
-      token,
-      type
-    });
+    if (token) {
+      args.add(target.constructor, {
+        dataType: dataType || 'string',
+        index,
+        key,
+        token,
+        type
+      });
+    }
   };
 }
 
 export function Inject(inject: InjectableToken): Decorator {
   return (target, token, index) => {
-    args.add(target.constructor, {
-      index,
-      target: inject,
-      token,
-      type: ArgumentsType.Inject
-    });
+    if (token) {
+      args.add(target.constructor, {
+        index,
+        target: inject,
+        token,
+        type: ArgumentsType.Inject
+      });
+    }
   };
 }
 

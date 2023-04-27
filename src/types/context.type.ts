@@ -1,6 +1,6 @@
 import { Context } from '@xofttion/dependency-injection';
 
-const key = 'contextCooplins';
+const key = 'copplinsContext';
 
 export function getContext(request: any): Undefined<Context> {
   return request[key] instanceof Context ? request[key] : undefined;

@@ -1,22 +1,22 @@
-import { Either } from '@xofttion/utils';
-import { HttpCode, Result } from './types';
+import { Result } from '@xofttion/utils';
+import { HttpCode, ResultServer } from './types';
 
-export function resultBadRequest(data: any): Result {
-  return Either.left({ statusCode: HttpCode.BadRequest, data });
+export function resultBadRequest(data: any): ResultServer {
+  return Result.failure({ statusCode: HttpCode.BadRequest, data });
 }
 
-export function resultUnauthorized(data: any): Result {
-  return Either.left({ statusCode: HttpCode.Unauthorized, data });
+export function resultUnauthorized(data: any): ResultServer {
+  return Result.failure({ statusCode: HttpCode.Unauthorized, data });
 }
 
-export function resultForbidden(data: any): Result {
-  return Either.left({ statusCode: HttpCode.Forbidden, data });
+export function resultForbidden(data: any): ResultServer {
+  return Result.failure({ statusCode: HttpCode.Forbidden, data });
 }
 
-export function resultNotFound(data: any): Result {
-  return Either.left({ statusCode: HttpCode.NotFound, data });
+export function resultNotFound(data: any): ResultServer {
+  return Result.failure({ statusCode: HttpCode.NotFound, data });
 }
 
-export function resultInternalServerError(data: any): Result {
-  return Either.left({ statusCode: HttpCode.InternalServerError, data });
+export function resultInternalServerError(data: any): ResultServer {
+  return Result.failure({ statusCode: HttpCode.InternalServerError, data });
 }

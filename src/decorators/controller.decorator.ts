@@ -1,4 +1,4 @@
-import { createInjectable } from '@xofttion/dependency-injection';
+import { storeInjectable } from '@xofttion/dependency-injection';
 import { controllers } from '../stores';
 import { MiddlewareToken } from '../types';
 
@@ -9,6 +9,6 @@ export function Controller(
   return (target) => {
     controllers.add(target, { basePath, middlewares });
 
-    createInjectable({ target, singleton: true });
+    storeInjectable({ target, singleton: true });
   };
 }

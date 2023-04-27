@@ -1,4 +1,4 @@
-import factoryInjectable from '@xofttion/dependency-injection';
+import factoryInject from '@xofttion/dependency-injection';
 import express, { Express, Request, Response } from 'express';
 import {
   createHttpArguments,
@@ -46,7 +46,7 @@ function createCallback(config: LambdaCallback): RouteCallback {
   const { token, error } = config;
 
   return createWrap((request: Request, response: Response) => {
-    const object = factoryInjectable<any>({ token, context: getContext(request) });
+    const object = factoryInject<any>({ token, context: getContext(request) });
 
     if (typeof object.execute !== 'function') {
       return Promise.resolve();

@@ -1,4 +1,4 @@
-import factoryInjectable from '@xofttion/dependency-injection';
+import factoryInject from '@xofttion/dependency-injection';
 import express, { Express, Request, Response, Router } from 'express';
 import {
   createHttpArguments,
@@ -28,7 +28,7 @@ type ControllerCallback = {
 export function registerControllers({ collection, error, server }: Config): void {
   for (const token of collection) {
     controllers.get(token).present(({ basePath, middlewares }) => {
-      const controller = factoryInjectable<ControllerType>({ token });
+      const controller = factoryInject<ControllerType>({ token });
       const router = createRouterController(middlewares);
 
       const routesConfig = routes.get(token);

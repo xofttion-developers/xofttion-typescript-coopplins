@@ -1,13 +1,13 @@
-import { Either } from '@xofttion/utils';
+import { Result } from '@xofttion/utils';
 import { Request, Response } from 'express';
 import { CoopplinsError } from '../exceptions';
-import { HttpCode, Result } from '../types';
+import { HttpCode, ResultServer } from '../types';
 
 const message = 'An error occurred during the execution of the process';
 const errorCode = HttpCode.InternalServerError;
 
 type WrapCallback = (req: Request, res: Response) => Promise<any>;
-type WrapCall = (req: Request, res: Response) => Promise<Result | any> | any;
+type WrapCall = (req: Request, res: Response) => Promise<ResultServer | any> | any;
 type WrapError = (ex: unknown) => void;
 
 type WrapConfig = {
@@ -38,15 +38,15 @@ function wrap(config: WrapConfig): Promise<any> {
 }
 
 function resolvePromise(result: any, response: Response): void {
-  if (result instanceof Either) {
-    result.fold({
-      right: (data) => {
+  if (result instanceof Result) {
+    result.when(
+      (data) => {
         response.status(HttpCode.Ok).json(data);
       },
-      left: ({ statusCode, data }) => {
+      ({ statusCode, data }) => {
         response.status(statusCode).json(data);
       }
-    });
+    );
   } else {
     response.status(HttpCode.Ok).json(result);
   }

@@ -1,4 +1,4 @@
-import factoryInjectable from '@xofttion/dependency-injection';
+import factoryInject from '@xofttion/dependency-injection';
 import { parseBoolean } from '@xofttion/utils';
 import { Request } from 'express';
 import { args } from '../stores';
@@ -39,9 +39,7 @@ export function createHttpArguments(config: ArgumentConfig): any[] {
         break;
       case ArgumentsType.Inject:
         values.push(
-          token
-            ? factoryInjectable({ token, context: getContext(request) })
-            : undefined
+          token ? factoryInject({ token, context: getContext(request) }) : undefined
         );
         break;
     }

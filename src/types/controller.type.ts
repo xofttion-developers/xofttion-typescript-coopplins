@@ -1,4 +1,4 @@
-import { Either } from '@xofttion/utils';
+import { Result } from '@xofttion/utils';
 import { MiddlewareToken } from './middleware.type';
 
 export type ControllerConfig = {
@@ -11,4 +11,4 @@ export type ResultInvalid = {
   statusCode: number;
 };
 
-export type Result<T = unknown> = Either<ResultInvalid, T>;
+export type ResultServer<T = unknown> = Result<ResultInvalid, T>;
