@@ -6,9 +6,9 @@ export type ControllerConfig = {
   middlewares: MiddlewareToken[];
 };
 
-export type ResultInvalid = {
-  data: any;
+export type ResultInvalid<T = unknown> = {
+  data: T;
   statusCode: number;
 };
 
-export type ResultServer<T = unknown> = Result<ResultInvalid, T>;
+export type ResultServer<T = unknown> = Result<ResultInvalid | unknown, T>;

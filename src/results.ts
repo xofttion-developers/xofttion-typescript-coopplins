@@ -1,22 +1,30 @@
 import { Result } from '@xofttion/utils';
 import { HttpCode, ResultServer } from './types';
 
-export function resultBadRequest(data: any): ResultServer {
-  return Result.failure({ statusCode: HttpCode.BadRequest, data });
+export function resultSuccessful<T>(data: T): ResultServer {
+  return Result.success(data);
 }
 
-export function resultUnauthorized(data: any): ResultServer {
-  return Result.failure({ statusCode: HttpCode.Unauthorized, data });
+export function resultBadRequest<T>(data: T): ResultServer {
+  return resultFailure(HttpCode.BadRequest, data);
 }
 
-export function resultForbidden(data: any): ResultServer {
-  return Result.failure({ statusCode: HttpCode.Forbidden, data });
+export function resultUnauthorized<T>(data: T): ResultServer {
+  return resultFailure(HttpCode.Unauthorized, data);
 }
 
-export function resultNotFound(data: any): ResultServer {
-  return Result.failure({ statusCode: HttpCode.NotFound, data });
+export function resultForbidden<T>(data: T): ResultServer {
+  return resultFailure(HttpCode.Forbidden, data);
 }
 
-export function resultInternalServerError(data: any): ResultServer {
-  return Result.failure({ statusCode: HttpCode.InternalServerError, data });
+export function resultNotFound<T>(data: T): ResultServer {
+  return resultFailure(HttpCode.NotFound, data);
+}
+
+export function resultInternalServerError<T>(data: T): ResultServer {
+  return resultFailure(HttpCode.InternalServerError, data);
+}
+
+function resultFailure<T>(statusCode: HttpCode, data: T): ResultServer {
+  return Result.failure({ statusCode, data });
 }
