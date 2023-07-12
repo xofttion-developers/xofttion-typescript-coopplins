@@ -12,8 +12,8 @@ const defaultConfig: HttpConfig = {
 function createRoute(http: Http, path: string, config: HttpConfig): MethodDecorator {
   const { middlewares } = config;
 
-  return (target, key) => {
-    routes.add(target.constructor, {
+  return ({ constructor }, key) => {
+    routes.add(constructor, {
       http,
       key,
       middlewares,

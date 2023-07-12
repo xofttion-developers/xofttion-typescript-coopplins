@@ -1,30 +1,28 @@
-import { Result } from '@xofttion/utils';
 import { Request, Response } from 'express';
 import { CoopplinsError } from '../exceptions';
-import { HttpCode, ResultServer } from '../types';
+import { HttpCode, Result, ResultServer } from '../types';
 
 const message = 'An error occurred during the execution of the process';
 const errorCode = HttpCode.InternalServerError;
 
-type WrapCallback = (req: Request, res: Response) => Promise<any>;
-type WrapCall = (req: Request, res: Response) => Promise<ResultServer | any> | any;
-type WrapError = (ex: unknown) => void;
+type FnWrap = (req: Request, res: Response) => Promise<any>;
+type FnCallback = (req: Request, res: Response) => Promise<ResultServer | any> | any;
+type FnError = (error: unknown) => void;
 
-type WrapConfig = {
-  callback: WrapCall;
-  error?: WrapError;
+type Settings = {
+  callback: FnCallback;
+  error?: FnError;
   request: Request;
   response: Response;
 };
 
-export function createWrap(callback: WrapCall, error?: WrapError): WrapCallback {
-  return (request: Request, response: Response) => {
-    return wrap({ request, response, error, callback });
-  };
+export function createWrap(callback: FnCallback, error?: FnError): FnWrap {
+  return (request: Request, response: Response) =>
+    wrap({ request, response, error, callback });
 }
 
-function wrap(config: WrapConfig): Promise<any> {
-  const { request, response, callback } = config;
+function wrap(settings: Settings): Promise<any> {
+  const { request, response, callback } = settings;
 
   const result = callback(request, response);
 
@@ -34,29 +32,29 @@ function wrap(config: WrapConfig): Promise<any> {
 
   return result
     .then((result) => resolvePromise(result, response))
-    .catch((exception) => catchPromise(exception, config));
+    .catch((error) => catchPromise(error, settings));
 }
 
 function resolvePromise(result: any, response: Response): void {
   if (result instanceof Result) {
-    result.when(
-      (data) => {
+    result.when({
+      success: (data) => {
         response.status(HttpCode.Ok).json(data);
       },
-      ({ statusCode, data }) => {
-        response.status(statusCode).json(data);
+      failure: ({ statusCode, data }) => {
+        response.status(statusCode || errorCode).json(data);
       }
-    );
+    });
   } else {
     response.status(HttpCode.Ok).json(result);
   }
 }
 
-function catchPromise(exception: any, config: WrapConfig): void {
-  const { response, error } = config;
+function catchPromise(exception: any, settings: Settings): void {
+  const { response, error } = settings;
 
   if (error) {
-    error(exception); // Handler error
+    return error(exception); // Handler error
   }
 
   if (exception instanceof CoopplinsError) {

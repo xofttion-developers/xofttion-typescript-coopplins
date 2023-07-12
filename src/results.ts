@@ -1,5 +1,4 @@
-import { Result } from '@xofttion/utils';
-import { HttpCode, ResultServer } from './types';
+import { HttpCode, Result, ResultServer } from './types';
 
 export function resultSuccessful<T>(data: T): ResultServer {
   return Result.success(data);

@@ -1,7 +1,7 @@
 {
   "name": "@xofttion/coopplins",
   "type": "commonjs",
-  "version": "4.9.16",
+  "version": "4.9.17",
   "author": "Daniel Andrés Castillo Pedroza",
   "license": "MIT",
   "main": "index.js",
@@ -15,8 +15,8 @@
     "publish": "npm run clean && npm run build && cd artifact && npm publish"
   },
   "dependencies": {
-    "@xofttion/dependency-injection": "^4.9.12",
-    "@xofttion/utils": "^4.9.16",
+    "@xofttion/dependency-injection": "^4.9.17",
+    "@xofttion/utils": "^4.9.29",
     "dotenv": "^16.0.2",
     "express": "^4.18.2",
     "express-validator": "^6.14.3",

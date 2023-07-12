@@ -11,9 +11,9 @@ type Config = {
 };
 
 function createParameter({ type, key, dataType }: Config): Decorator {
-  return (target, token, index) => {
+  return ({ constructor }, token, index) => {
     if (token) {
-      args.add(target.constructor, {
+      args.add(constructor, {
         dataType: dataType || 'string',
         index,
         key,
@@ -25,9 +25,9 @@ function createParameter({ type, key, dataType }: Config): Decorator {
 }
 
 export function Inject(inject: InjectableToken): Decorator {
-  return (target, token, index) => {
+  return ({ constructor }, token, index) => {
     if (token) {
-      args.add(target.constructor, {
+      args.add(constructor, {
         index,
         target: inject,
         token,
