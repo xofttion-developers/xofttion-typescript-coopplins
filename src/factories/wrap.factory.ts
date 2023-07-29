@@ -11,14 +11,14 @@ type FnError = (error: unknown) => void;
 
 type Settings = {
   callback: FnCallback;
-  error?: FnError;
+  handleError?: FnError;
   request: Request;
   response: Response;
 };
 
-export function createWrap(callback: FnCallback, error?: FnError): FnWrap {
+export function createWrap(callback: FnCallback, handleError?: FnError): FnWrap {
   return (request: Request, response: Response) =>
-    wrap({ request, response, error, callback });
+    wrap({ request, response, handleError, callback });
 }
 
 function wrap(settings: Settings): Promise<any> {
@@ -51,10 +51,10 @@ function resolvePromise(result: any, response: Response): void {
 }
 
 function catchPromise(exception: any, settings: Settings): void {
-  const { response, error } = settings;
+  const { response, handleError } = settings;
 
-  if (error) {
-    return error(exception); // Handler error
+  if (handleError) {
+    handleError(exception); // Listener error
   }
 
   if (exception instanceof CoopplinsError) {
