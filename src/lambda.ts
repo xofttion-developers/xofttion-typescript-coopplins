@@ -13,13 +13,13 @@ type RouteCallback = (request: Request, response: Response) => Promise<any>;
 
 type Config = {
   collection: Function[];
-  error?: (ex: unknown) => void;
   server: Express;
+  error?: (error: unknown) => void;
 };
 
 type LambdaCallback = {
   token: Function;
-  error?: (ex: unknown) => void;
+  error?: (error: unknown) => void;
 };
 
 const key = 'execute';
@@ -46,7 +46,9 @@ function createCallback(config: LambdaCallback): RouteCallback {
   const { token, error } = config;
 
   return createWrap((request: Request, response: Response) => {
-    const object = factoryInject<any>({ token, context: getContext(request) });
+    const object = factoryInject<any>({
+      config: { token, context: getContext(request) }
+    });
 
     if (typeof object.execute !== 'function') {
       return Promise.resolve();

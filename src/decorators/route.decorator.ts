@@ -13,12 +13,7 @@ function createRoute(http: Http, path: string, config: HttpConfig): MethodDecora
   const { middlewares } = config;
 
   return ({ constructor }, key) => {
-    routes.add(constructor, {
-      http,
-      key,
-      middlewares,
-      path
-    });
+    routes.add(constructor, { http, key, middlewares, path });
   };
 }
 

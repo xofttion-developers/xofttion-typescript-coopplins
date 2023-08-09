@@ -5,11 +5,11 @@ import { middlewares } from '../stores';
 import { MiddlewareRoute, MiddlewareToken, OnMiddleware } from '../types';
 
 export function createMiddlewares(collection: MiddlewareToken[]): MiddlewareRoute[] {
-  return collection.reduce((middlewares, middleware) => {
+  return collection.reduce((middlewares: MiddlewareRoute[], middleware) => {
     createMiddleware(middleware).present((call) => middlewares.push(call));
 
     return middlewares;
-  }, [] as MiddlewareRoute[]);
+  }, []);
 }
 
 export function createMiddleware(token: MiddlewareToken): Optional<MiddlewareRoute> {
@@ -23,7 +23,7 @@ export function createMiddleware(token: MiddlewareToken): Optional<MiddlewareRou
     );
   }
 
-  const middleware = factoryInject({ token });
+  const middleware = factoryInject({ config: { token } });
 
   return isMiddleware(middleware)
     ? Optional.of((req: Request, res: Response, next: NextFunction) => {

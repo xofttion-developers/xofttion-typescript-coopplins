@@ -12,9 +12,9 @@ export enum ArgumentsType {
 
 export type ArgumentsConfig = {
   index: number;
-  token: string | symbol;
+  name: string | symbol;
   type: ArgumentsType;
   dataType?: ArgumentsDataType;
   key?: string;
-  target?: InjectableToken;
+  token?: InjectableToken;
 };

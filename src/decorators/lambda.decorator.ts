@@ -1,12 +1,18 @@
-import { storeInjectable } from '@xofttion/dependency-injection';
+import { registerInjectable } from '@xofttion/dependency-injection';
 import { lambdas } from '../stores';
 import { Http, LambdaConfig, MiddlewareToken } from '../types';
 
 function createLambda(config: LambdaConfig): ClassDecorator {
-  return (target) => {
-    lambdas.add(target, config);
+  return (token) => {
+    lambdas.add(token, config);
 
-    storeInjectable({ target, singleton: false });
+    registerInjectable({
+      config: {
+        scopeable: true,
+        singleton: false,
+        token
+      }
+    });
   };
 }
 

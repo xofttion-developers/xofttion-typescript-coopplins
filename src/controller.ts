@@ -28,7 +28,7 @@ type ControllerCallback = {
 export function registerControllers({ collection, error, server }: Config): void {
   for (const token of collection) {
     controllers.get(token).present(({ basePath, middlewares }) => {
-      const controller = factoryInject<ControllerType>({ token });
+      const controller = factoryInject<ControllerType>({ config: { token } });
       const router = createRouterController(middlewares);
 
       const routesConfig = routes.get(token);

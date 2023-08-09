@@ -2,8 +2,8 @@ import { Http } from './http.type';
 import { MiddlewareToken } from './middleware.type';
 
 export type RouteConfig = {
-  key: string | symbol;
   http: Http;
+  key: string | symbol;
   middlewares: MiddlewareToken[];
   path: string;
 };

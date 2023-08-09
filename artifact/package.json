@@ -1,14 +1,14 @@
 {
   "name": "@xofttion/coopplins",
   "type": "commonjs",
-  "version": "4.9.20",
+  "version": "4.9.21",
   "author": "Daniel Andrés Castillo Pedroza",
   "license": "MIT",
   "main": "index.js",
   "typings": "index.d.ts",
   "module": "xofttion-coopplins.esm.js",
   "dependencies": {
-    "@xofttion/dependency-injection": "^4.9.17",
+    "@xofttion/dependency-injection": "^4.9.20",
     "@xofttion/utils": "^4.9.31",
     "dotenv": "^16.0.2",
     "express": "^4.18.2",

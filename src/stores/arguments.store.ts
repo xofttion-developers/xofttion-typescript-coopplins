@@ -7,7 +7,7 @@ class ArgumentStore {
   private collection: ControllerMap = new Map();
 
   public add(controller: Function, config: ArgumentsConfig): void {
-    const { token, index } = config;
+    const { name: token, index } = config;
 
     const argsCollection = this.get(controller, token);
 

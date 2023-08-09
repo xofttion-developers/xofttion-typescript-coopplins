@@ -5,19 +5,23 @@ import { args } from '../stores';
 import { ArgumentsDataType, ArgumentsType, getContext } from '../types';
 
 type ArgumentConfig = {
-  object: any;
   key: string | symbol;
+  object: any;
   request: Request;
 };
 
 export function createHttpArguments(config: ArgumentConfig): any[] {
-  const { key, object, request } = config;
+  const {
+    key,
+    object: { constructor },
+    request
+  } = config;
 
-  const argsConfig = args.get(object.constructor, key);
+  const argsConfig = args.get(constructor, key);
 
   const values: any[] = [];
 
-  for (const { dataType, key, type, target: token } of argsConfig) {
+  for (const { dataType, key, type, token } of argsConfig) {
     switch (type) {
       case ArgumentsType.Body:
         values.push(key ? request.body[key] : request.body);
@@ -39,7 +43,9 @@ export function createHttpArguments(config: ArgumentConfig): any[] {
         break;
       case ArgumentsType.Inject:
         values.push(
-          token ? factoryInject({ token, context: getContext(request) }) : undefined
+          token
+            ? factoryInject({ config: { token, context: getContext(request) } })
+            : undefined
         );
         break;
     }

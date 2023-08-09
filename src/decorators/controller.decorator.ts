@@ -1,4 +1,4 @@
-import { storeInjectable } from '@xofttion/dependency-injection';
+import { registerInjectable } from '@xofttion/dependency-injection';
 import { controllers } from '../stores';
 import { MiddlewareToken } from '../types';
 
@@ -6,9 +6,15 @@ export function Controller(
   basePath = '/',
   middlewares: MiddlewareToken[] = []
 ): ClassDecorator {
-  return (target) => {
-    controllers.add(target, { basePath, middlewares });
+  return (token) => {
+    controllers.add(token, { basePath, middlewares });
 
-    storeInjectable({ target, singleton: true });
+    registerInjectable({
+      config: {
+        scopeable: false,
+        singleton: true,
+        token
+      }
+    });
   };
 }
