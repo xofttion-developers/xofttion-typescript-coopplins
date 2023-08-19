@@ -15,27 +15,25 @@ type RouteCallback = (request: Request, response: Response) => Promise<any>;
 
 type Config = {
   collection: Function[];
-  error?: (ex: unknown) => void;
   server: Express;
+  error?: (ex: unknown) => void;
 };
 
 type ControllerCallback = {
   controller: ControllerType;
-  error?: (ex: unknown) => void;
   key: string | symbol;
+  error?: (ex: unknown) => void;
 };
 
 export function registerControllers({ collection, error, server }: Config): void {
   for (const token of collection) {
-    controllers.get(token).present(({ basePath, middlewares }) => {
+    controllers.fetch(token).present(({ basePath, middlewares }) => {
       const controller = factoryInject<ControllerType>({ config: { token } });
       const router = createRouterController(middlewares);
 
-      const routesConfig = routes.get(token);
+      const configs = routes.fetch(token);
 
-      for (const config of routesConfig) {
-        const { http, middlewares, key, path } = config;
-
+      for (const { http, middlewares, key, path } of configs) {
         const middlewaresRoute = createMiddlewares(middlewares);
         const httpRoute = createHttpRoute(router, http);
         const callRoute = createCallback({ controller, key, error });

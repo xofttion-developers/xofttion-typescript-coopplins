@@ -4,7 +4,7 @@ import { Http, LambdaConfig, MiddlewareToken } from '../types';
 
 function createLambda(config: LambdaConfig): ClassDecorator {
   return (token) => {
-    lambdas.add(token, config);
+    lambdas.push(token, config);
 
     registerInjectable({
       config: {

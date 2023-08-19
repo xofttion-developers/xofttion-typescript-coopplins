@@ -1,23 +1,24 @@
 import { ArgumentsConfig } from '../types';
 
-type ArgumentMap = Map<string | symbol, ArgumentsConfig[]>;
-type ControllerMap = Map<Function, ArgumentMap>;
+type Token = string | symbol;
+type ArgumentIndex = Map<Token, ArgumentsConfig[]>;
+type ControllerIndex = Map<Function, ArgumentIndex>;
 
 class ArgumentStore {
-  private collection: ControllerMap = new Map();
+  private collection: ControllerIndex = new Map();
 
-  public add(controller: Function, config: ArgumentsConfig): void {
+  public push(controller: Function, config: ArgumentsConfig): void {
     const { name: token, index } = config;
 
-    const argsCollection = this.get(controller, token);
+    const argsCollection = this.fetch(controller, token);
 
     argsCollection[index] = config;
   }
 
-  public get(controller: Function, token: string | symbol): ArgumentsConfig[] {
-    const functionMap = this.getArgumentMap(controller);
+  public fetch(controller: Function, token: Token): ArgumentsConfig[] {
+    const argsIndexs = this.fetchArgumentIndex(controller);
 
-    const current = functionMap.get(token);
+    const current = argsIndexs.get(token);
 
     if (current) {
       return current;
@@ -25,23 +26,23 @@ class ArgumentStore {
 
     const collection: ArgumentsConfig[] = [];
 
-    functionMap.set(token, collection);
+    argsIndexs.set(token, collection);
 
     return collection;
   }
 
-  private getArgumentMap(controller: Function): ArgumentMap {
+  private fetchArgumentIndex(controller: Function): ArgumentIndex {
     const current = this.collection.get(controller);
 
     if (current) {
       return current;
     }
 
-    const map = new Map<string | symbol, ArgumentsConfig[]>();
+    const indexs = new Map<Token, ArgumentsConfig[]>();
 
-    this.collection.set(controller, map);
+    this.collection.set(controller, indexs);
 
-    return map;
+    return indexs;
   }
 }
 

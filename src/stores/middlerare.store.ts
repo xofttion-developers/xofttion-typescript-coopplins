@@ -1,7 +1,7 @@
 class MiddlewareStore {
   private collection: Function[] = [];
 
-  public add(middleware: Function): void {
+  public push(middleware: Function): void {
     this.collection.push(middleware);
   }
 

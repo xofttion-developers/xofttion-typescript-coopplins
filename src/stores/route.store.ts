@@ -1,37 +1,37 @@
 import { RouteConfig } from '../types';
 
-type RouteMap = Map<string, RouteConfig>;
-type ControllerMap = Map<Function, RouteMap>;
+type RouteIndex = Map<string, RouteConfig>;
+type ControllerIndex = Map<Function, RouteIndex>;
 
 class RouteStore {
-  private collection: ControllerMap = new Map();
+  private collection: ControllerIndex = new Map();
 
-  public add(controller: Function, config: RouteConfig): void {
-    const routeMap = this.getRouteMap(controller);
+  public push(controller: Function, config: RouteConfig): void {
+    const indexs = this.fetchRouteIndex(controller);
 
     const { http, path } = config;
 
-    routeMap.set(`${http}:${path}`, config);
+    indexs.set(`${http}:${path}`, config);
   }
 
-  public get(controller: Function): RouteConfig[] {
-    const routeMap = this.getRouteMap(controller);
+  public fetch(controller: Function): RouteConfig[] {
+    const indexs = this.fetchRouteIndex(controller);
 
-    return Array.from(routeMap.values());
+    return Array.from(indexs.values());
   }
 
-  private getRouteMap(controller: Function): RouteMap {
-    const currentRoute = this.collection.get(controller);
+  private fetchRouteIndex(controller: Function): RouteIndex {
+    const current = this.collection.get(controller);
 
-    if (currentRoute) {
-      return currentRoute;
+    if (current) {
+      return current;
     }
 
-    const routeMap = new Map<string, RouteConfig>();
+    const indexs = new Map<string, RouteConfig>();
 
-    this.collection.set(controller, routeMap);
+    this.collection.set(controller, indexs);
 
-    return routeMap;
+    return indexs;
   }
 }
 

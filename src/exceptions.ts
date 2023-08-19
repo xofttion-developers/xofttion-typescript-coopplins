@@ -34,6 +34,12 @@ export class NotFoundError extends CoopplinsError {
   }
 }
 
+export class UnprocessableDomain extends CoopplinsError {
+  constructor(message: string, data?: any) {
+    super(HttpCode.UnprocessableDomain, message, data);
+  }
+}
+
 export class InternalServerError extends CoopplinsError {
   constructor(message: string, data?: any) {
     super(HttpCode.InternalServerError, message, data);

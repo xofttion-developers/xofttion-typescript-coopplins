@@ -1,25 +1,25 @@
 import { Context } from '@xofttion/dependency-injection';
 
-const key = 'copplinsContext';
+const KEY = 'copplinsContext';
 
-export function getContext(request: any): Undefined<Context> {
-  return request[key] instanceof Context ? request[key] : undefined;
+export function fetchContext(request: any): Undefined<Context> {
+  return request[KEY] instanceof Context ? request[KEY] : undefined;
 }
 
-export function putContext(request: any, context: Context): void {
-  request[key] = context;
+export function saveContext(request: any, context: Context): void {
+  request[KEY] = context;
 }
 
 export function proxyContext(request: any): Context {
-  const currentContext = getContext(request);
+  const current = fetchContext(request);
 
-  if (currentContext) {
-    return currentContext;
+  if (current) {
+    return current;
   }
 
   const context = new Context();
 
-  putContext(request, context);
+  saveContext(request, context);
 
   return context;
 }

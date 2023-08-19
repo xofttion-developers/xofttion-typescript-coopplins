@@ -13,7 +13,7 @@ type Config = {
 function createParameter({ type, key, dataType }: Config): Decorator {
   return ({ constructor }, name, index) => {
     if (name) {
-      args.add(constructor, {
+      args.push(constructor, {
         dataType: dataType || 'string',
         index,
         key,
@@ -27,7 +27,7 @@ function createParameter({ type, key, dataType }: Config): Decorator {
 export function Inject(inject: InjectableToken): Decorator {
   return ({ constructor }, name, index) => {
     if (name) {
-      args.add(constructor, {
+      args.push(constructor, {
         index,
         token: inject,
         name,
@@ -53,26 +53,26 @@ export function HeaderNumber(key: string): Decorator {
   return createParameter({ type: ArgumentsType.Header, dataType: 'number', key });
 }
 
-export function PathParam(key: string, dataType?: DataType): Decorator {
+export function Path(key: string, dataType?: DataType): Decorator {
   return createParameter({ type: ArgumentsType.Path, dataType, key });
 }
 
-export function PathParamBool(key: string): Decorator {
+export function PathBool(key: string): Decorator {
   return createParameter({ type: ArgumentsType.Path, dataType: 'boolean', key });
 }
 
-export function PathParamNumber(key: string): Decorator {
+export function PathNumber(key: string): Decorator {
   return createParameter({ type: ArgumentsType.Path, dataType: 'number', key });
 }
 
-export function QueryParam(key: string, dataType?: DataType): Decorator {
+export function Query(key: string, dataType?: DataType): Decorator {
   return createParameter({ type: ArgumentsType.Query, dataType, key });
 }
 
-export function QueryParamBool(key: string): Decorator {
+export function QueryBool(key: string): Decorator {
   return createParameter({ type: ArgumentsType.Query, dataType: 'boolean', key });
 }
 
-export function QueryParamNumber(key: string): Decorator {
+export function QueryNumber(key: string): Decorator {
   return createParameter({ type: ArgumentsType.Query, dataType: 'number', key });
 }

@@ -7,7 +7,7 @@ export function Controller(
   middlewares: MiddlewareToken[] = []
 ): ClassDecorator {
   return (token) => {
-    controllers.add(token, { basePath, middlewares });
+    controllers.push(token, { basePath, middlewares });
 
     registerInjectable({
       config: {

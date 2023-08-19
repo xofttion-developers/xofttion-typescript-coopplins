@@ -3,7 +3,7 @@ import { middlewares } from '../stores';
 
 export function Middleware(): ClassDecorator {
   return (token) => {
-    middlewares.add(token);
+    middlewares.push(token);
 
     registerInjectable({
       config: {

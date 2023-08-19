@@ -7,7 +7,7 @@ import {
   createWrap
 } from './factories';
 import { lambdas } from './stores';
-import { getContext } from './types';
+import { fetchContext } from './types';
 
 type RouteCallback = (request: Request, response: Response) => Promise<any>;
 
@@ -22,18 +22,14 @@ type LambdaCallback = {
   error?: (error: unknown) => void;
 };
 
-const key = 'execute';
-
 export function registerLambdas({ collection, error, server }: Config): void {
-  for (const ref of collection) {
-    lambdas.get(ref).present((config) => {
-      const { http, middlewares, path } = config;
-
+  for (const token of collection) {
+    lambdas.fetch(token).present(({ http, middlewares, path }) => {
       const router = express.Router({ mergeParams: true });
 
       const httpLambda = createHttpRoute(router, http);
       const middleraresLambda = createMiddlewares(middlewares);
-      const callLambda = createCallback({ token: ref, error });
+      const callLambda = createCallback({ token, error });
 
       httpLambda('/', [...middleraresLambda, callLambda]);
 
@@ -47,16 +43,16 @@ function createCallback(config: LambdaCallback): RouteCallback {
 
   return createWrap((request: Request, response: Response) => {
     const object = factoryInject<any>({
-      config: { token, context: getContext(request) }
+      config: { token, context: fetchContext(request) }
     });
 
     if (typeof object.execute !== 'function') {
       return Promise.resolve();
     }
 
-    const resolver = object[key].bind(object);
+    const resolver = object.execute.bind(object);
 
-    const args = createHttpArguments({ object, key, request });
+    const args = createHttpArguments({ object, key: 'execute', request });
 
     return resolver(...[...args, request, response]);
   }, error);
