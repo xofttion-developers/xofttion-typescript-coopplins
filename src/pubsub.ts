@@ -2,17 +2,14 @@ import factoryInject, { Context, Injectable } from '@xofttion/dependency-injecti
 import { Constructable } from '@xofttion/dependency-injection/types';
 import { promiseFrom } from '@xofttion/utils';
 
-type Voids = Promise<void[]>;
-type Void = Promise<void>;
-type Result = void | Void;
-
 export abstract class Subscriber<T = unknown> {
-  abstract execute(value: T): Result;
+  abstract execute(value: T): any | Promise<any>;
 }
 
 type Subscription = Constructable<Subscriber>;
 
-interface EmitConfig<T = unknown> {
+interface Emitter<T = unknown> {
+  event: string;
   value: T;
   context?: Context;
 }
@@ -27,12 +24,12 @@ export function registerPubSub(event: string, subscription: Subscription): void 
   events[event].add(subscription);
 }
 
-export function emitPubSub<T>(event: string, config: EmitConfig<T>): Voids {
+export function emitPubSub<T>(config: Emitter<T>): Promise<any[]> {
+  const { event, value, context } = config;
+
   const subscriptions = events[event];
 
   if (subscriptions) {
-    const { value, context } = config;
-
     return Promise.all(
       Array.from(subscriptions).map((token) => {
         const subcription = factoryInject({ config: { token, context } });
@@ -49,7 +46,7 @@ export function emitPubSub<T>(event: string, config: EmitConfig<T>): Voids {
 export class PubSub {
   constructor(private context?: Context) {}
 
-  public emit<T = unknown>(event: string, value: T): Voids {
-    return emitPubSub(event, { value, context: this.context });
+  public emit<T = unknown>(event: string, value: T): Promise<any[]> {
+    return emitPubSub({ event, value, context: this.context });
   }
 }
